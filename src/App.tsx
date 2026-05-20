@@ -512,18 +512,20 @@ export default function App() {
           transition: 'color 0.4s', userSelect: 'none',
         }}>💾</span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 4,
-            background: 'var(--timer-bg)', border: '1px solid var(--timer-border)', borderRadius: 8, padding: '0 12px', height: 44,
-          }}>
-            <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: gameOver ? 'var(--timer-color-over)' : 'var(--timer-color)' }}>
-              ⏱ {formatTime(elapsed)}
-            </span>
-            <button className="btn-icon" onClick={() => setTimerActive((a) => !a)} style={{
-              background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
-              padding: '0 4px', color: 'var(--text-secondary)', height: 44, display: 'flex', alignItems: 'center',
-            }}>{timerActive ? '⏸' : '▶'}</button>
-          </div>
+          {isDesktop && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              background: 'var(--timer-bg)', border: '1px solid var(--timer-border)', borderRadius: 8, padding: '0 12px', height: 44,
+            }}>
+              <span style={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums', color: gameOver ? 'var(--timer-color-over)' : 'var(--timer-color)' }}>
+                ⏱ {formatTime(elapsed)}
+              </span>
+              <button className="btn-icon" onClick={() => setTimerActive((a) => !a)} style={{
+                background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
+                padding: '0 4px', color: 'var(--text-secondary)', height: 44, display: 'flex', alignItems: 'center',
+              }}>{timerActive ? '⏸' : '▶'}</button>
+            </div>
+          )}
           <button className="btn-nav" onClick={() => { initialOnboardingRef.current = false; setShowOnboarding(true) }} style={navS(true)}>{t.help}</button>
           <button className="btn-nav" onClick={() => setShowParams(true)} style={{ ...navS(true), gap: 4 }}>
             ⚙️{isDesktop && <span> {t.params.replace('⚙️ ', '')}</span>}

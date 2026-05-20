@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
 import { I18N, type Lang } from './i18n'
-import { makeGame, cloneGame, replenishHand, doWithdraw, calcScore, ck, parseKey } from './game/logic'
+import { makeGame, cloneGame, replenishHand, doWithdraw, ck, parseKey } from './game/logic'
 import { runCpuTurn, type Difficulty } from './game/ai'
 import { saveGame, loadSave, clearSave, saveSettings, loadSettings, type Theme } from './game/storage'
 import { playSound } from './game/sounds'

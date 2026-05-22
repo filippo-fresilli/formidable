@@ -10,6 +10,12 @@ export const COLOR_HEX: Record<Color, string> = {
   G: '#3DC35A',
 }
 
+export const COLOR_STROKE: Record<Color, string> = {
+  B: '#003D80',
+  R: '#800000',
+  G: '#00661A',
+}
+
 // Player colors: human, bot1, bot2, bot3
 export const PLAYER_COLORS      = ['#1A1A2E', '#7B2D8B', '#E8A020', '#2D8B3A']
 export const PLAYER_COLORS_DARK = ['#7ab4f5', '#c07fe0', '#E8A020', '#4dc85e']

@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react'
-import { COLOR_HEX, HRAD } from '../game/constants'
+import { COLOR_HEX, COLOR_STROKE, HRAD } from '../game/constants'
 import { ck, parseKey, nbrs, sharedTraits, hexPoints, ALL_CELLS } from '../game/logic'
 import { OuterShape, InnerShape } from './HexCard'
 import { MEEPLE_PATH } from './MeepleIcon'
@@ -127,8 +127,8 @@ export function Board({
               <polygon points={hexPoints(x, y, hr - 0.5)} style={{ fill, stroke, strokeWidth: sw }} />
               {card && (
                 <>
-                  <OuterShape shape={card.os} cx={x} cy={y} inset={inset} fill="white" />
-                  <InnerShape shape={card.is} cx={x} cy={y} inset={inset} fill={COLOR_HEX[card.ic]} />
+                  <OuterShape shape={card.os} cx={x} cy={y} inset={inset} fill="white" stroke={COLOR_STROKE[card.oc]} strokeWidth={hr * 0.08} />
+                  <InnerShape shape={card.is} cx={x} cy={y} inset={inset} fill={COLOR_HEX[card.ic]} stroke={COLOR_STROKE[card.ic]} strokeWidth={hr * 0.08} />
                 </>
               )}
               {isConq && meep === undefined && (

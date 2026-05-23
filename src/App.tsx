@@ -526,7 +526,14 @@ export default function App() {
       )}
 
       {showOnboarding && <OnboardingModal t={t}
-        onClose={() => setShowOnboarding(false)}
+        onClose={() => {
+          setShowOnboarding(false)
+          // If closed early (not via "Inizia a giocare!"), go back to params
+          if (initialOnboardingRef.current) {
+            setParamsIsFirstOpen(true)
+            setShowParams(true)
+          }
+        }}
         onStart={() => {
           setShowOnboarding(false)
           initialOnboardingRef.current = false

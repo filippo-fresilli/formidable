@@ -522,8 +522,10 @@ export default function App() {
       <div style={{ ...panel, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '.02em' }}>Formidable</span>
         <span style={{
-          fontSize: 10, color: justSaved ? '#3DC35A' : 'var(--text-faint)',
-          transition: 'color 0.4s', userSelect: 'none',
+          fontSize: 12, color: '#3DC35A', userSelect: 'none',
+          opacity: justSaved ? 1 : 0,
+          transition: 'opacity 0.6s',
+          pointerEvents: 'none',
         }}>💾</span>
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
           {isDesktop && (

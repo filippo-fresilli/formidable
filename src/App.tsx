@@ -301,24 +301,20 @@ export default function App() {
             flex: 1, background: 'var(--bg-panel)', borderRadius: 10,
             border: `2px solid ${isActive ? playerColors[i] : playerColors[i] + '33'}`,
             boxShadow: isActive ? `0 0 12px ${playerColors[i]}55` : 'none',
-            padding: '8px 10px', textAlign: 'center', transition: 'all 0.3s',
+            padding: '8px 12px', transition: 'all 0.3s',
+            display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: playerColors[i], marginBottom: 2 }}>{PL[i]}</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color: playerColors[i], lineHeight: 1.1 }}>
-              {scores[i]}<span style={{ fontSize: 12, fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
+            <div style={{ fontSize: 13, fontWeight: 700, color: playerColors[i], flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {PL[i]}
             </div>
-            <div style={{ display: 'flex', gap: 4, justifyContent: 'center', marginTop: 4 }}>
+            <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
               {Array.from({ length: tokens[i] + Object.values(meeples).filter((v) => v === i).length }, (_, j) => (
-                <MeepleInline key={j} color={playerColors[i]} filled={j < tokens[i]} size={16} />
+                <MeepleInline key={j} color={playerColors[i]} filled={j < tokens[i]} size={14} />
               ))}
             </div>
-            {isActive && !busy && (
-              <div style={{
-                marginTop: 6, fontSize: 12, fontWeight: 600,
-                color: playerColors[i], background: `${playerColors[i]}11`,
-                borderRadius: 6, padding: '3px 6px',
-              }}>{t.playing}</div>
-            )}
+            <div style={{ fontSize: 22, fontWeight: 800, color: playerColors[i], lineHeight: 1, flexShrink: 0 }}>
+              {scores[i]}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
+            </div>
           </div>
         )
       })}

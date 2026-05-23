@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { I18nDict } from '../i18n'
 
-export function OnboardingModal({ t, onClose }: { t: I18nDict; onClose: () => void }) {
+export function OnboardingModal({ t, onClose, onStart }: { t: I18nDict; onClose: () => void; onStart?: () => void }) {
   const [step, setStep] = useState(0)
   const steps = t.onboarding
   const { icon, title, text } = steps[step]
@@ -45,7 +45,7 @@ export function OnboardingModal({ t, onClose }: { t: I18nDict; onClose: () => vo
             cursor: 'pointer', fontSize: 14, fontFamily: 'inherit',
           }}>{step > 0 ? t.prev : t.close}</button>
           <span style={{ fontSize: 13, color: 'var(--text-faint)' }}>{step + 1}/{steps.length}</span>
-          <button className="btn-primary" onClick={() => isLast ? onClose() : setStep((s) => s + 1)} style={{
+          <button className="btn-primary" onClick={() => isLast ? (onStart ?? onClose)() : setStep((s) => s + 1)} style={{
             padding: '8px 20px', borderRadius: 8, border: 'none',
             background: '#1E7FFF', color: '#fff', cursor: 'pointer',
             fontSize: 14, fontFamily: 'inherit', fontWeight: 600,

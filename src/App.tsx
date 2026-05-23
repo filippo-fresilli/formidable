@@ -525,13 +525,14 @@ export default function App() {
         </div>
       )}
 
-      {showOnboarding && <OnboardingModal t={t} onClose={() => {
-        setShowOnboarding(false)
-        if (initialOnboardingRef.current) {
+      {showOnboarding && <OnboardingModal t={t}
+        onClose={() => setShowOnboarding(false)}
+        onStart={() => {
+          setShowOnboarding(false)
           initialOnboardingRef.current = false
           restart(numPlayers)
-        }
-      }} />}
+        }}
+      />}
       {showParams && (
         <ParamsModal t={t} lang={lang} setLang={setLang} numPlayers={numPlayers}
           onSetPlayers={(n) => { setNumPlayers(n); if (!paramsIsFirstOpen) restart(n) }}

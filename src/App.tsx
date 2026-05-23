@@ -61,11 +61,11 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(savedSettings?.theme ?? 'light')
   const [playerName, setPlayerName] = useState(savedSettings?.playerName ?? '')
   const [muted, setMuted] = useState(savedSettings?.muted ?? false)
-  const [showOnboarding, setShowOnboarding] = useState(!isResume)
-  const [showParams, setShowParams] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showParams, setShowParams] = useState(!isResume)
   const [showWin, setShowWin] = useState(false)
   const [showResume, setShowResume] = useState(isResume)
-  const [paramsIsFirstOpen, setParamsIsFirstOpen] = useState(false)
+  const [paramsIsFirstOpen, setParamsIsFirstOpen] = useState(!isResume)
   const [winner, setWinner] = useState<{ name: string; score: number } | null>(null)
   const [elapsed, setElapsed] = useState(isResume ? (savedGame?.elapsed ?? 0) : 0)
   const [timerActive, setTimerActive] = useState(false)
@@ -529,14 +529,13 @@ export default function App() {
         setShowOnboarding(false)
         if (initialOnboardingRef.current) {
           initialOnboardingRef.current = false
-          setParamsIsFirstOpen(true)
-          setShowParams(true)
+          restart(numPlayers)
         }
       }} />}
       {showParams && (
         <ParamsModal t={t} lang={lang} setLang={setLang} numPlayers={numPlayers}
           onSetPlayers={(n) => { setNumPlayers(n); if (!paramsIsFirstOpen) restart(n) }}
-          onStart={() => { restart(numPlayers); setShowParams(false); setParamsIsFirstOpen(false) }}
+          onStart={() => { setShowParams(false); setParamsIsFirstOpen(false); setShowOnboarding(true) }}
           onRestart={() => restart()}
           difficulty={difficulty} setDifficulty={setDifficulty}
           playerName={playerName} setPlayerName={setPlayerName}

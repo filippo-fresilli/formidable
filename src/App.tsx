@@ -419,9 +419,26 @@ export default function App() {
     </div>
   )
 
+  const UndoIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3 7v6h6" /><path d="M3 13C5 7 10 4 16 5.5a9 9 0 0 1 5 7.5" />
+    </svg>
+  )
+  const RedoIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 7v6h-6" /><path d="M21 13C19 7 14 4 8 5.5A9 9 0 0 0 3 13" />
+    </svg>
+  )
+
   const history_panel = (
     <div style={panel} className="history-panel">
-      <div style={H3}>{t.history}</div>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: H3.marginBottom }}>
+        <div style={{ ...H3, marginBottom: 0, flex: 1 }}>{t.history}</div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          <button className="btn-nav" style={navS(canBack)} onClick={() => { playSound('undo', muted); dispatch({ type: 'UNDO' }) }} disabled={!canBack || busy} title="Undo"><UndoIcon /></button>
+          <button className="btn-nav" style={navS(canFwd)} onClick={() => dispatch({ type: 'REDO' })} disabled={!canFwd || busy} title="Redo"><RedoIcon /></button>
+        </div>
+      </div>
       <div className="history-log">
         {log.length === 0 && <div style={{ color: 'var(--text-faint)' }}>—</div>}
         {log.map((entry, i) => (
@@ -503,9 +520,6 @@ export default function App() {
 
       {/* TOP BAR */}
       <div style={{ ...panel, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        <button className="btn-nav" style={navS(canBack)} onClick={() => { playSound('undo', muted); dispatch({ type: 'UNDO' }) }} disabled={!canBack || busy}>←</button>
-        <button className="btn-nav" style={navS(canFwd)} onClick={() => dispatch({ type: 'REDO' })} disabled={!canFwd || busy}>→</button>
-        <div style={{ width: 1, height: 20, background: 'var(--border-subtle)' }} />
         <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '.02em' }}>Formidable</span>
         <span style={{
           fontSize: 10, color: justSaved ? '#3DC35A' : 'var(--text-faint)',

@@ -294,12 +294,8 @@ export default function App() {
   const scores_row = (
     <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
       {Array.from({ length: np }, (_, i) => {
+        if (i === 0) return null // player 1 shown inside hand_panel
         const isActive = turn === i && !gameOver
-        const instr = isActive && !busy ? (
-          phase === 'place' ? (selIdx >= 0 ? t.clickCell : t.selectCard) :
-          phase === 'meeple' ? t.useMeeple :
-          phase === 'withdraw' ? t.clickMeeple : null
-        ) : isActive && busy ? t.playing : null
         return (
           <div key={i} style={{
             flex: 1, background: 'var(--bg-panel)', borderRadius: 10,
@@ -316,12 +312,12 @@ export default function App() {
                 <MeepleInline key={j} color={playerColors[i]} filled={j < tokens[i]} size={16} />
               ))}
             </div>
-            {instr && (
+            {isActive && !busy && (
               <div style={{
                 marginTop: 6, fontSize: 12, fontWeight: 600,
                 color: playerColors[i], background: `${playerColors[i]}11`,
                 borderRadius: 6, padding: '3px 6px',
-              }}>{instr}</div>
+              }}>{t.playing}</div>
             )}
           </div>
         )
@@ -331,9 +327,48 @@ export default function App() {
 
   const hexSize = isDesktop ? 72 : 48
 
+  const isMyTurn = turn === 0 && !gameOver && !busy
+  const myInstr = isMyTurn ? (
+    phase === 'place' ? (selIdx >= 0 ? t.clickCell : t.selectCard) :
+    phase === 'meeple' ? t.useMeeple :
+    phase === 'withdraw' ? t.clickMeeple : null
+  ) : null
+  const handTitle = t.handOf.replace('{name}', PL[0])
+
   const hand_panel = (
-    <div style={panel}>
-      <div style={H3}>{t.hand}</div>
+    <div style={{
+      ...panel,
+      border: `2px solid ${isMyTurn ? playerColors[0] : playerColors[0] + '33'}`,
+      boxShadow: isMyTurn ? `0 0 12px ${playerColors[0]}44` : 'none',
+      transition: 'border-color 0.3s, box-shadow 0.3s',
+    }}>
+      {/* Header: title + meeples + score */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, color: playerColors[0], flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {handTitle}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 3 }}>
+            {Array.from({ length: tokens[0] + Object.values(meeples).filter((v) => v === 0).length }, (_, j) => (
+              <MeepleInline key={j} color={playerColors[0]} filled={j < tokens[0]} size={14} />
+            ))}
+          </div>
+          <div style={{ fontSize: 22, fontWeight: 800, color: playerColors[0], lineHeight: 1 }}>
+            {scores[0]}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Instruction when active */}
+      {myInstr && (
+        <div style={{
+          marginBottom: 10, fontSize: 12, fontWeight: 600,
+          color: playerColors[0], background: `${playerColors[0]}11`,
+          borderRadius: 6, padding: '4px 8px',
+        }}>{myInstr}</div>
+      )}
+
+      {/* Cards */}
       <div style={{ display: 'flex', gap: 8 }}>
         {turn === 0 && !gameOver ? hands[0].map((c, i) => (
           <div key={i} className="btn-card" onClick={() => selectCard(i)} style={{

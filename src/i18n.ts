@@ -6,7 +6,7 @@ export interface I18nDict {
   placeMeeple: string; withdrawMeeple: string
   skip: string; cancel: string; restart: string
   params: string; help: string; history: string
-  hand: string; actions: string; opponents: string
+  hand: string; handOf: string; actions: string; opponents: string
   language: string; close: string; startGame: string
   next: string; prev: string; hint: string
   placeable: string; conquerable: string; withdrawable: string
@@ -35,7 +35,7 @@ export const I18N: Record<Lang, I18nDict> = {
     placeMeeple: 'Piazza pedina ●', withdrawMeeple: 'Ritira pedina ↩',
     skip: 'Salta', cancel: '← Annulla', restart: '🔄 Ricomincia',
     params: '⚙️ Impostazioni', help: '?', history: 'Storico mosse',
-    hand: 'La tua mano', actions: 'Azioni', opponents: 'Avversari 🤖',
+    hand: 'La tua mano', handOf: 'La mano di {name}', actions: 'Azioni', opponents: 'Avversari 🤖',
     language: 'Lingua', close: 'Chiudi', startGame: 'Inizia a giocare! →',
     next: 'Avanti →', prev: '← Indietro', hint: 'Seleziona carta, poi clicca cella blu.',
     placeable: 'posizionabile', conquerable: 'conquistabile', withdrawable: 'ritirabile',
@@ -64,7 +64,7 @@ export const I18N: Record<Lang, I18nDict> = {
     placeMeeple: 'Place meeple ●', withdrawMeeple: 'Withdraw meeple ↩',
     skip: 'Skip', cancel: '← Cancel', restart: '🔄 Restart',
     params: '⚙️ Settings', help: '?', history: 'Move history',
-    hand: 'Your hand', actions: 'Actions', opponents: 'Opponents 🤖',
+    hand: 'Your hand', handOf: "{name}'s hand", actions: 'Actions', opponents: 'Opponents 🤖',
     language: 'Language', close: 'Close', startGame: 'Start playing! →',
     next: 'Next →', prev: '← Back', hint: 'Select card, then click a blue cell.',
     placeable: 'placeable', conquerable: 'conquerable', withdrawable: 'withdrawable',
@@ -93,7 +93,7 @@ export const I18N: Record<Lang, I18nDict> = {
     placeMeeple: 'Poser le pion ●', withdrawMeeple: 'Retirer le pion ↩',
     skip: 'Passer', cancel: '← Annuler', restart: '🔄 Recommencer',
     params: '⚙️ Paramètres', help: '?', history: 'Historique',
-    hand: 'Ta main', actions: 'Actions', opponents: 'Adversaires 🤖',
+    hand: 'Ta main', handOf: 'La main de {name}', actions: 'Actions', opponents: 'Adversaires 🤖',
     language: 'Langue', close: 'Fermer', startGame: 'Commencer ! →',
     next: 'Suivant →', prev: '← Retour', hint: 'Sélectionne une carte, puis clique une case bleue.',
     placeable: 'plaçable', conquerable: 'conquérable', withdrawable: 'retirable',

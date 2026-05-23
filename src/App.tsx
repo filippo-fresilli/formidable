@@ -304,13 +304,15 @@ export default function App() {
             padding: '8px 12px', transition: 'all 0.3s',
             display: 'flex', alignItems: 'center', gap: 8,
           }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: playerColors[i], flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {PL[i]}
-            </div>
-            <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
-              {Array.from({ length: tokens[i] + Object.values(meeples).filter((v) => v === i).length }, (_, j) => (
-                <MeepleInline key={j} color={playerColors[i]} filled={j < tokens[i]} size={14} />
-              ))}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: playerColors[i], overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {PL[i]}
+              </div>
+              <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
+                {Array.from({ length: tokens[i] + Object.values(meeples).filter((v) => v === i).length }, (_, j) => (
+                  <MeepleInline key={j} color={playerColors[i]} filled={j < tokens[i]} size={14} />
+                ))}
+              </div>
             </div>
             <div style={{ fontSize: 22, fontWeight: 800, color: playerColors[i], lineHeight: 1, flexShrink: 0 }}>
               {scores[i]}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
@@ -338,29 +340,28 @@ export default function App() {
       boxShadow: isMyTurn ? `0 0 12px ${playerColors[0]}44` : 'none',
       transition: 'border-color 0.3s, box-shadow 0.3s',
     }}>
-      {/* Header: title + meeples + score */}
+      {/* Header: title + meeples (left) | score (right) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: playerColors[0], flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {handTitle}
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-          <div style={{ display: 'flex', gap: 3 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 700, color: playerColors[0], overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {handTitle}
+          </div>
+          <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
             {Array.from({ length: tokens[0] + Object.values(meeples).filter((v) => v === 0).length }, (_, j) => (
               <MeepleInline key={j} color={playerColors[0]} filled={j < tokens[0]} size={14} />
             ))}
           </div>
-          <div style={{ fontSize: 22, fontWeight: 800, color: playerColors[0], lineHeight: 1 }}>
-            {scores[0]}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
-          </div>
+        </div>
+        <div style={{ fontSize: 22, fontWeight: 800, color: playerColors[0], lineHeight: 1, flexShrink: 0 }}>
+          {scores[0]}<span style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
         </div>
       </div>
 
       {/* Instruction when active */}
       {myInstr && (
         <div style={{
-          marginBottom: 10, fontSize: 12, fontWeight: 600,
-          color: playerColors[0], background: `${playerColors[0]}11`,
-          borderRadius: 6, padding: '4px 8px',
+          marginBottom: 10, fontSize: 12, fontStyle: 'italic',
+          color: playerColors[0],
         }}>{myInstr}</div>
       )}
 

@@ -167,7 +167,7 @@ button { -webkit-tap-highlight-color: transparent; }
   }
 
   .sidebar {
-    width: 528px;
+    width: 475px;
     flex-shrink: 0;
     overflow-y: auto;
   }

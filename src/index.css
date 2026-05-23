@@ -195,9 +195,15 @@ button { -webkit-tap-highlight-color: transparent; }
 .scores-desktop { display: none; }
 .scores-mobile  { display: block; }
 
+/* Hand panel: mobile shows above board, desktop shows in sidebar */
+.hand-desktop { display: none; }
+.hand-mobile  { display: block; }
+
 @media (min-width: 768px) {
   .scores-desktop { display: block; }
   .scores-mobile  { display: none; }
+  .hand-desktop   { display: block; }
+  .hand-mobile    { display: none; }
 }
 
 /* ── Bot thinking animation ──────────────────────────────────────────────── */

@@ -590,6 +590,7 @@ export default function App() {
         {/* Board column — first in DOM so it appears on top on mobile */}
         <div className="left-col">
           <div className="scores-mobile">{scores_row}</div>
+          <div className="hand-mobile">{hand_panel}</div>
           <div className="board-wrap">
             <Board
               board={board} meeples={meeples} conquered={conquered}
@@ -604,7 +605,7 @@ export default function App() {
         {/* Sidebar — second in DOM (below board on mobile, left on desktop via CSS order) */}
         <div className="sidebar">
           <div className="scores-desktop">{scores_row}</div>
-          {hand_panel}
+          <div className="hand-desktop">{hand_panel}</div>
           {actions_panel}
           {history_panel}
         </div>

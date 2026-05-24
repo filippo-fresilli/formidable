@@ -9,7 +9,7 @@ export function OnboardingModal({ t, onClose, onStart }: { t: I18nDict; onClose:
   const isLast = step === steps.length - 1
 
   return (
-    <ModalShell maxWidth={480} padding={32} onClose={onClose}>
+    <ModalShell maxWidth={480} padding={32} onClose={onStart ?? onClose}>
       {/* Dot pagination */}
       <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 24 }}>
         {steps.map((_, i) => (

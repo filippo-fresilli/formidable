@@ -82,8 +82,12 @@ function StatsView({ t, onBack, onClose }: { t: I18nDict; onBack: () => void; on
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
         <button onClick={onBack} style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: 20, color: 'var(--text-faint)', padding: '4px 8px 4px 0', lineHeight: 1,
-        }}>←</button>
+          padding: '4px 8px 4px 0', lineHeight: 1, display: 'flex', alignItems: 'center',
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
         <h2 style={{ flex: 1, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
           {t.statsTitle}
         </h2>

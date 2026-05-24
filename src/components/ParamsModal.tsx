@@ -2,6 +2,7 @@ import React from 'react'
 import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
+import { ModalShell } from './ModalShell'
 
 function ToggleGroup<T extends string | number>({
   options, selected, onSelect,
@@ -58,92 +59,84 @@ export function ParamsModal({
   )
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16,
-    }}>
-      <div style={{
-        background: 'var(--bg-panel)', borderRadius: 16, padding: 28, maxWidth: 360, width: '100%',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-      }}>
-        <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>{t.params}</h2>
-        {sec(t.playerNameLabel, (
-          <input
-            type="text"
-            value={playerName}
-            onChange={(e) => setPlayerName(e.target.value)}
-            maxLength={24}
-            placeholder={t.playerNamePlaceholder}
-            style={{
-              width: '100%', padding: '10px 12px', borderRadius: 10, boxSizing: 'border-box',
-              border: '2px solid var(--border-default)', background: 'var(--bg-panel-alt)',
-              color: 'var(--text-primary)', fontSize: 14, fontFamily: 'inherit',
-              outline: 'none', transition: 'border-color 0.15s',
-            }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)' }}
-            onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)' }}
-          />
-        ))}
-        {sec(t.language, (
-          <ToggleGroup
-            options={[{ id: 'it' as Lang, label: '🇮🇹 Italiano' }, { id: 'en' as Lang, label: '🇬🇧 English' }, { id: 'fr' as Lang, label: '🇫🇷 Français' }]}
-            selected={lang} onSelect={setLang}
-          />
-        ))}
-        {sec(t.opponents, (
-          <ToggleGroup
-            options={[{ id: 2, label: '1 🤖' }, { id: 3, label: '2 🤖' }, { id: 4, label: '3 🤖' }]}
-            selected={numPlayers} onSelect={onSetPlayers}
-          />
-        ))}
-        {sec(t.difficulty, (
-          <ToggleGroup
-            options={(['easy', 'medium', 'hard'] as Difficulty[]).map(d => ({ id: d, label: t.diffLabels[d] }))}
-            selected={difficulty} onSelect={setDifficulty}
-          />
-        ))}
-        <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
-          <button onClick={() => setMuted(!muted)} style={{
-            flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
-            border: `2px solid ${muted ? 'var(--border-default)' : 'var(--color-primary)'}`,
-            background: muted ? 'var(--bg-panel-alt)' : 'var(--color-primary-subtle)',
-            color: muted ? 'var(--text-secondary)' : 'var(--color-primary)',
-            fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-          }}>{muted ? t.soundOff : t.soundOn}</button>
-          <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} style={{
-            flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
-            border: '2px solid var(--border-default)',
-            background: 'var(--bg-panel-alt)',
-            color: 'var(--text-secondary)',
-            fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-          }}>{theme === 'dark' ? t.themeLight : t.themeDark}</button>
-        </div>
-        {isFirstOpen ? (
-          <button className="btn-primary" onClick={onStart} style={{
-            width: '100%', padding: 12, borderRadius: 10, border: 'none',
-            background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
-            fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
-          }}>{t.letsGo}</button>
-        ) : (
-          <>
-            <button className="btn-primary" onClick={() => { onRestart(); onClose() }} style={{
-              width: '100%', padding: 10, borderRadius: 10, border: 'none',
-              background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
-              fontSize: 14, fontWeight: 700, fontFamily: 'inherit', marginBottom: 10,
-            }}>{t.restart}</button>
-            <button className="btn-ghost" onClick={onClose} style={{
-              width: '100%', padding: 10, borderRadius: 10,
-              border: '1px solid var(--border-default)', background: 'var(--bg-panel-alt)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer', fontSize: 14, fontFamily: 'inherit',
-            }}>{t.close}</button>
-          </>
-        )}
-        <p style={{
-          margin: '16px 0 0', fontSize: 11, color: 'var(--text-faint)',
-          textAlign: 'center', lineHeight: 1.5,
-        }}>{t.credits}</p>
+    <ModalShell maxWidth={360} padding={28}>
+      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>{t.params}</h2>
+      {sec(t.playerNameLabel, (
+        <input
+          type="text"
+          value={playerName}
+          onChange={(e) => setPlayerName(e.target.value)}
+          maxLength={24}
+          placeholder={t.playerNamePlaceholder}
+          style={{
+            width: '100%', padding: '10px 12px', borderRadius: 10, boxSizing: 'border-box',
+            border: '2px solid var(--border-default)', background: 'var(--bg-panel-alt)',
+            color: 'var(--text-primary)', fontSize: 14, fontFamily: 'inherit',
+            outline: 'none', transition: 'border-color 0.15s',
+          }}
+          onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)' }}
+          onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)' }}
+        />
+      ))}
+      {sec(t.language, (
+        <ToggleGroup
+          options={[{ id: 'it' as Lang, label: '🇮🇹 Italiano' }, { id: 'en' as Lang, label: '🇬🇧 English' }, { id: 'fr' as Lang, label: '🇫🇷 Français' }]}
+          selected={lang} onSelect={setLang}
+        />
+      ))}
+      {sec(t.opponents, (
+        <ToggleGroup
+          options={[{ id: 2, label: '1 🤖' }, { id: 3, label: '2 🤖' }, { id: 4, label: '3 🤖' }]}
+          selected={numPlayers} onSelect={onSetPlayers}
+        />
+      ))}
+      {sec(t.difficulty, (
+        <ToggleGroup
+          options={(['easy', 'medium', 'hard'] as Difficulty[]).map(d => ({ id: d, label: t.diffLabels[d] }))}
+          selected={difficulty} onSelect={setDifficulty}
+        />
+      ))}
+      <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+        <button onClick={() => setMuted(!muted)} style={{
+          flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
+          border: `2px solid ${muted ? 'var(--border-default)' : 'var(--color-primary)'}`,
+          background: muted ? 'var(--bg-panel-alt)' : 'var(--color-primary-subtle)',
+          color: muted ? 'var(--text-secondary)' : 'var(--color-primary)',
+          fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+        }}>{muted ? t.soundOff : t.soundOn}</button>
+        <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} style={{
+          flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
+          border: '2px solid var(--border-default)',
+          background: 'var(--bg-panel-alt)',
+          color: 'var(--text-secondary)',
+          fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+        }}>{theme === 'dark' ? t.themeLight : t.themeDark}</button>
       </div>
-    </div>
+      {isFirstOpen ? (
+        <button className="btn-primary" onClick={onStart} style={{
+          width: '100%', padding: 12, borderRadius: 10, border: 'none',
+          background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
+          fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
+        }}>{t.letsGo}</button>
+      ) : (
+        <>
+          <button className="btn-primary" onClick={() => { onRestart(); onClose() }} style={{
+            width: '100%', padding: 10, borderRadius: 10, border: 'none',
+            background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
+            fontSize: 14, fontWeight: 700, fontFamily: 'inherit', marginBottom: 10,
+          }}>{t.restart}</button>
+          <button className="btn-ghost" onClick={onClose} style={{
+            width: '100%', padding: 10, borderRadius: 10,
+            border: '1px solid var(--border-default)', background: 'var(--bg-panel-alt)',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer', fontSize: 14, fontFamily: 'inherit',
+          }}>{t.close}</button>
+        </>
+      )}
+      <p style={{
+        margin: '16px 0 0', fontSize: 11, color: 'var(--text-faint)',
+        textAlign: 'center', lineHeight: 1.5,
+      }}>{t.credits}</p>
+    </ModalShell>
   )
 }

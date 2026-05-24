@@ -1,33 +1,20 @@
-import React, { useState, useEffect, useRef, useReducer, useCallback } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { I18N, type Lang } from './i18n'
-import { makeGame, cloneGame, replenishHand, doWithdraw, ck, parseKey } from './game/logic'
-import { runCpuTurn, type Difficulty } from './game/ai'
+import { makeGame } from './game/logic'
+import { type Difficulty } from './game/ai'
 import { saveGame, loadSave, clearSave, saveSettings, loadSettings, type Theme } from './game/storage'
 import { playSound } from './game/sounds'
 import { PLAYER_COLORS, PLAYER_COLORS_DARK, COLOR_HEX } from './game/constants'
-import type { GameState, HistoryState, HistoryAction } from './game/types'
+import { parseKey } from './game/logic'
+import type { HistoryState } from './game/types'
+import { useGame } from './game/useGame'
 import { Board } from './components/Board'
 import { OnboardingModal } from './components/OnboardingModal'
 import { WinModal } from './components/WinModal'
 import { ParamsModal } from './components/ParamsModal'
+import { ModalShell } from './components/ModalShell'
 import { MiniHex } from './components/HexCard'
 import { MeepleInline } from './components/MeepleIcon'
-
-// ── History reducer ───────────────────────────────────────────────────────────
-
-function historyReducer(state: HistoryState, action: HistoryAction): HistoryState {
-  switch (action.type) {
-    case 'COMMIT': return { past: [...state.past, state.present], present: action.game, future: [] }
-    case 'UNDO':
-      if (!state.past.length) return state
-      return { past: state.past.slice(0, -1), present: state.past[state.past.length - 1], future: [state.present, ...state.future] }
-    case 'REDO':
-      if (!state.future.length) return state
-      return { past: [...state.past, state.present], present: state.future[0], future: state.future.slice(1) }
-    case 'RESET': return { past: [], present: action.game, future: [] }
-    default: return state
-  }
-}
 
 const formatTime = (s: number) =>
   `${Math.floor(s / 60).toString().padStart(2, '0')}:${(s % 60).toString().padStart(2, '0')}`
@@ -57,50 +44,81 @@ export default function App() {
   })
   const { savedSettings, savedGame, isResume } = init
 
-  const [lang, setLang] = useState<Lang>(savedSettings?.lang ?? 'it')
-  const [theme, setTheme] = useState<Theme>(savedSettings?.theme ?? 'light')
+  // ── Settings state ────────────────────────────────────────────────────────
+  const [lang, setLang]             = useState<Lang>(savedSettings?.lang ?? 'it')
+  const [theme, setTheme]           = useState<Theme>(savedSettings?.theme ?? 'light')
   const [playerName, setPlayerName] = useState(savedSettings?.playerName ?? '')
-  const [muted, setMuted] = useState(savedSettings?.muted ?? false)
-  const [showOnboarding, setShowOnboarding] = useState(false)
-  const [showParams, setShowParams] = useState(!isResume)
-  const [showWin, setShowWin] = useState(false)
-  const [showResume, setShowResume] = useState(isResume)
-  const [paramsIsFirstOpen, setParamsIsFirstOpen] = useState(!isResume)
-  const [winner, setWinner] = useState<{ name: string; score: number } | null>(null)
-  const [elapsed, setElapsed] = useState(isResume ? (savedGame?.elapsed ?? 0) : 0)
-  const [timerActive, setTimerActive] = useState(false)
-  const [cpuBusy, setCpuBusy] = useState(false)
+  const [muted, setMuted]           = useState(savedSettings?.muted ?? false)
   const [numPlayers, setNumPlayers] = useState(savedSettings?.numPlayers ?? 2)
   const [difficulty, setDifficulty] = useState<Difficulty>(savedSettings?.difficulty ?? 'medium')
-  const [justSaved, setJustSaved] = useState(false)
+
+  // ── UI state ──────────────────────────────────────────────────────────────
+  const [showOnboarding, setShowOnboarding]     = useState(false)
+  const [showParams, setShowParams]             = useState(!isResume)
+  const [showWin, setShowWin]                   = useState(false)
+  const [showResume, setShowResume]             = useState(isResume)
+  const [paramsIsFirstOpen, setParamsIsFirstOpen] = useState(!isResume)
+  const [winner, setWinner]                     = useState<{ name: string; score: number } | null>(null)
+  const [elapsed, setElapsed]                   = useState(isResume ? (savedGame?.elapsed ?? 0) : 0)
+  const [timerActive, setTimerActive]           = useState(false)
+  const [justSaved, setJustSaved]               = useState(false)
   const isDesktop = useMediaQuery('(min-width: 768px)')
 
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const cpuRef = useRef(false)
-  const langRef = useRef(lang)
-  const difficultyRef = useRef(difficulty)
-  const mutedRef = useRef(muted)
-  // true only for the very first onboarding shown at startup (not when reopened via help button)
+  // ── Mutable refs (so action closures see the latest values without re-binding) ─
+  const langRef        = useRef(lang)
+  const difficultyRef  = useRef(difficulty)
+  const mutedRef       = useRef(muted)
+  const numPlayersRef  = useRef(numPlayers)
+  // true only for the very first onboarding shown at startup
   const initialOnboardingRef = useRef(!isResume)
-  langRef.current = lang
-  difficultyRef.current = difficulty
-  mutedRef.current = muted
 
-  const [hist, dispatch] = useReducer(
-    historyReducer,
-    undefined,
-    () => {
-      if (isResume && savedGame) {
-        return { past: [], present: savedGame.game, future: [] } as HistoryState
-      }
-      return { past: [], present: makeGame(savedSettings?.numPlayers ?? 2), future: [] } as HistoryState
-    }
-  )
-  const gs = hist.present
+  langRef.current       = lang
+  difficultyRef.current = difficulty
+  mutedRef.current      = muted
+  numPlayersRef.current = numPlayers
+
+  // ── Initial game state (computed once at mount) ───────────────────────────
+  const [initialState] = useState<HistoryState>(() => {
+    if (isResume && savedGame) return { past: [], present: savedGame.game, future: [] }
+    return { past: [], present: makeGame(savedSettings?.numPlayers ?? 2), future: [] }
+  })
+
+  // ── Timer ref ─────────────────────────────────────────────────────────────
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // ── Game logic hook ───────────────────────────────────────────────────────
+  const {
+    gs, dispatch,
+    busy, canBack, canFwd,
+    placeCard, placeMeeple, skipMeeple, playerWithdraw, selectCard, restart: gameRestart,
+  } = useGame({
+    initialState,
+    numPlayersRef,
+    mutedRef,
+    langRef,
+    difficultyRef,
+    initialOnboardingRef,
+    onTimerStart: () => setTimerActive(true),
+    onRestart: (n) => {
+      setNumPlayers(n)
+      setElapsed(0)
+      setTimerActive(false)
+      setShowWin(false)
+      setShowResume(false)
+    },
+  })
+
   const { board, meeples, conquered, scores, tokens, hands, turn, phase, selIdx, log, placedPos, gameOver, numPlayers: np } = gs
   const t = I18N[lang]
   const PL = [playerName.trim() || t.player1, t.bot1, t.bot2, t.bot3]
   const playerColors = theme === 'dark' ? PLAYER_COLORS_DARK : PLAYER_COLORS
+
+  // ── Restart wrapper (also handles UI modal cleanup) ───────────────────────
+  function restart(np2?: number) {
+    gameRestart(np2)
+  }
+
+  // ── Effects ───────────────────────────────────────────────────────────────
 
   useEffect(() => {
     if (timerActive && !gameOver) timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000)
@@ -117,155 +135,24 @@ export default function App() {
     }
   }, [gameOver]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Apply theme to <html> element ─────────────────────────────────────────
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
   }, [theme])
 
-  // ── Persist settings whenever they change ──────────────────────────────────
-  useEffect(() => { saveSettings({ lang, numPlayers, difficulty, theme, playerName, muted }) }, [lang, numPlayers, difficulty, theme, playerName, muted])
-
-  // ── Auto-save game state after every move ───────────────────────────────────
   useEffect(() => {
-    if (gs.log.length === 0) return        // don't save a brand-new untouched game
-    if (gs.gameOver) { clearSave(); return } // clear save when game ends
+    saveSettings({ lang, numPlayers, difficulty, theme, playerName, muted })
+  }, [lang, numPlayers, difficulty, theme, playerName, muted])
+
+  useEffect(() => {
+    if (gs.log.length === 0) return
+    if (gs.gameOver) { clearSave(); return }
     saveGame(gs, elapsed)
     setJustSaved(true)
     const timer = setTimeout(() => setJustSaved(false), 1200)
     return () => clearTimeout(timer)
   }, [gs]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── CPU executor ────────────────────────────────────────────────────────────
-
-  const executeCpu = useCallback((baseGame: GameState) => {
-    if (cpuRef.current) return
-    if (!baseGame || baseGame.turn === 0 || baseGame.gameOver) return
-    cpuRef.current = true
-    setCpuBusy(true)
-    const tLocal = I18N[langRef.current]
-    const diff = difficultyRef.current
-    setTimeout(() => {
-      const g = cloneGame(baseGame)
-      let idx = g.turn
-      const entries: string[] = []
-      while (idx !== 0) {
-        const desc = runCpuTurn(g, idx, tLocal, diff)
-        entries.push(desc)
-        if (g.gameOver) { g.turn = idx; break }
-        idx = (idx + 1) % g.numPlayers
-        g.turn = idx
-      }
-      if (!g.gameOver) { g.turn = 0; g.phase = 'place'; g.placedPos = null; g.selIdx = -1 }
-      g.log = [...g.log, ...entries]
-      dispatch({ type: 'COMMIT', game: g })
-      cpuRef.current = false
-      setCpuBusy(false)
-    }, 800)
-  }, [])
-
-  const initDone = useRef(false)
-  useEffect(() => {
-    if (!initDone.current) {
-      initDone.current = true
-      // Don't run CPU on load if onboarding/params will be shown first:
-      // the real game starts only when the user presses "Iniziamo!"
-      if (gs.turn !== 0 && !gs.gameOver && !initialOnboardingRef.current) executeCpu(gs)
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Player actions ──────────────────────────────────────────────────────────
-
-  function playerAction(mutateFn: (g: GameState) => void | false) {
-    if (cpuRef.current) return
-    const g = cloneGame(gs)
-    const result = mutateFn(g)
-    if (result === false) return
-    if (g.lastAction) { g.log = [...g.log, g.lastAction]; delete g.lastAction }
-    dispatch({ type: 'COMMIT', game: g })
-    if (g.turn !== 0 && !g.gameOver) executeCpu(g)
-  }
-
-  function placeCard(q: number, r: number, conquer: boolean) {
-    if (cpuRef.current) return
-    setTimerActive(true)
-    playSound(conquer ? 'conquer' : 'place', muted)
-    playerAction((g) => {
-      if (g.selIdx < 0 || g.turn !== 0) return false
-      const k = ck(q, r)
-      const card = g.hands[0][g.selIdx]
-      const label = `${t.colorNames[card.oc]} ${t.shapeNames[card.os]}`
-      if (conquer) {
-        g.discard.push(g.board[k]); g.conquered[k] = true
-        g.board[k] = card; g.hands[0].splice(g.selIdx, 1)
-        g.selIdx = -1; g.placedPos = { q, r }
-        g.meeples[k] = 0; g.tokens[0]--
-        replenishHand(g, 0); g.phase = 'draw'; g.turn = 1
-        g.lastAction = `G1 ⚔️ (${q},${r}) "${label}"`
-      } else {
-        g.board[k] = card; g.hands[0].splice(g.selIdx, 1)
-        g.selIdx = -1; g.placedPos = { q, r }
-        const myOnBoard = Object.values(g.meeples).filter((v) => v === 0).length
-        if (g.tokens[0] > 0 && myOnBoard === 0) {
-          g.meeples[k] = 0; g.tokens[0]--
-          replenishHand(g, 0); g.phase = 'draw'; g.turn = 1
-          g.lastAction = `G1 → (${q},${r}) "${label}" · ● auto`
-        } else {
-          g.phase = 'meeple'
-          g.lastAction = `G1 → (${q},${r}) "${label}"`
-        }
-      }
-    })
-  }
-
-  function placeMeeple() {
-    playSound('meeple', muted)
-    playerAction((g) => {
-      if (g.placedPos && g.tokens[0] > 0) {
-        const k = ck(g.placedPos.q, g.placedPos.r)
-        if (g.meeples[k] === undefined) { g.meeples[k] = 0; g.tokens[0]-- }
-      }
-      replenishHand(g, 0); g.phase = 'draw'; g.turn = 1
-      g.lastAction = `G1 ● (${g.placedPos?.q},${g.placedPos?.r})`
-    })
-  }
-
-  function skipMeeple() {
-    playerAction((g) => { replenishHand(g, 0); g.phase = 'draw'; g.turn = 1; g.lastAction = 'G1 skip' })
-  }
-
-  function playerWithdraw(q: number, r: number) {
-    playSound('withdraw', muted)
-    playerAction((g) => {
-      const { pts, details, isConq } = doWithdraw(g, 0, ck(q, r), t)
-      const pd = pts > 0 ? details.join(', ') : '0 pt'
-      g.lastAction = `G1 ↩ (${q},${r})${isConq ? ' 🔥' : ''} +${pts}pt (${pd}) tot ${g.scores[0]}`
-      if (!g.gameOver) { replenishHand(g, 0); g.phase = 'draw'; g.turn = 1 }
-    })
-  }
-
-  function selectCard(i: number) {
-    if (cpuRef.current || phase !== 'place') return
-    playSound('select', muted)
-    const g = cloneGame(gs); g.selIdx = g.selIdx === i ? -1 : i
-    dispatch({ type: 'COMMIT', game: g })
-  }
-
-  function restart(np2?: number) {
-    const n = np2 ?? numPlayers
-    setNumPlayers(n)
-    clearSave()
-    const newGame = makeGame(n)
-    dispatch({ type: 'RESET', game: newGame })
-    setElapsed(0); setTimerActive(false); setShowWin(false); setShowResume(false)
-    cpuRef.current = false; setCpuBusy(false)
-    if (newGame.turn !== 0) setTimeout(() => executeCpu(newGame), 800)
-  }
-
-  // ── Styles ──────────────────────────────────────────────────────────────────
-
-  const busy = cpuBusy || cpuRef.current
-  const canBack = hist.past.length > 0
-  const canFwd = hist.future.length > 0
+  // ── Derived UI values ─────────────────────────────────────────────────────
 
   const panel: React.CSSProperties = {
     background: 'var(--bg-panel)', borderRadius: 10, border: '0.5px solid var(--border-default)', padding: 10,
@@ -289,7 +176,7 @@ export default function App() {
     display: 'flex', alignItems: 'center', justifyContent: 'center',
   })
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
 
   const scores_row = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
@@ -397,7 +284,7 @@ export default function App() {
     </div>
   )
 
-  // ── Meeple action buttons (phase === 'meeple') ───────────────────────────
+  // ── Meeple action buttons (phase === 'meeple' | 'withdraw') ────────────────
   function renderMeepleActions() {
     const mine = Object.entries(meeples).filter(([, v]) => v === 0)
     const [singleKey] = mine.length === 1 ? mine[0] : [null]
@@ -488,58 +375,54 @@ export default function App() {
 
   return (
     <div className="app-root">
+      {/* ── Modals ───────────────────────────────────────────────────────── */}
+
       {showResume && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16,
-        }}>
-          <div style={{
-            background: 'var(--bg-panel)', borderRadius: 16, padding: 32, maxWidth: 360, width: '100%',
-            boxShadow: '0 20px 60px rgba(0,0,0,0.3)', textAlign: 'center',
-          }}>
-            <div style={{ fontSize: 48, marginBottom: 12 }}>💾</div>
-            <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
-              {t.resumeTitle}
-            </h2>
-            <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>
-              {t.resumeTurn} {gs.log.length} · {gs.scores.join(' – ')} pt
-            </p>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn-primary" onClick={() => { setShowResume(false); setTimerActive(true) }} style={{
-                flex: 1, padding: '11px 0', borderRadius: 10, border: 'none',
-                background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
-                fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-              }}>
-                {t.resume}
-              </button>
-              <button className="btn-ghost" onClick={() => { setShowResume(false); restart() }} style={{
-                flex: 1, padding: '11px 0', borderRadius: 10,
-                border: '1px solid var(--border-default)', background: 'var(--bg-panel-alt)',
-                color: 'var(--text-secondary)',
-                cursor: 'pointer', fontSize: 14, fontFamily: 'inherit',
-              }}>
-                {t.newGame}
-              </button>
-            </div>
+        <ModalShell maxWidth={360} padding={32} textAlign="center">
+          <div style={{ fontSize: 48, marginBottom: 12 }}>💾</div>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+            {t.resumeTitle}
+          </h2>
+          <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>
+            {t.resumeTurn} {gs.log.length} · {gs.scores.join(' – ')} pt
+          </p>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn-primary" onClick={() => { setShowResume(false); setTimerActive(true) }} style={{
+              flex: 1, padding: '11px 0', borderRadius: 10, border: 'none',
+              background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
+              fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+            }}>
+              {t.resume}
+            </button>
+            <button className="btn-ghost" onClick={() => { setShowResume(false); restart() }} style={{
+              flex: 1, padding: '11px 0', borderRadius: 10,
+              border: '1px solid var(--border-default)', background: 'var(--bg-panel-alt)',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer', fontSize: 14, fontFamily: 'inherit',
+            }}>
+              {t.newGame}
+            </button>
           </div>
-        </div>
+        </ModalShell>
       )}
 
-      {showOnboarding && <OnboardingModal t={t}
-        onClose={() => {
-          setShowOnboarding(false)
-          // If closed early (not via "Inizia a giocare!"), go back to params
-          if (initialOnboardingRef.current) {
-            setParamsIsFirstOpen(true)
-            setShowParams(true)
-          }
-        }}
-        onStart={() => {
-          setShowOnboarding(false)
-          initialOnboardingRef.current = false
-          restart(numPlayers)
-        }}
-      />}
+      {showOnboarding && (
+        <OnboardingModal t={t}
+          onClose={() => {
+            setShowOnboarding(false)
+            if (initialOnboardingRef.current) {
+              setParamsIsFirstOpen(true)
+              setShowParams(true)
+            }
+          }}
+          onStart={() => {
+            setShowOnboarding(false)
+            initialOnboardingRef.current = false
+            restart(numPlayers)
+          }}
+        />
+      )}
+
       {showParams && (
         <ParamsModal t={t} lang={lang} setLang={setLang} numPlayers={numPlayers}
           onSetPlayers={(n) => { setNumPlayers(n); if (!paramsIsFirstOpen) restart(n) }}
@@ -550,14 +433,18 @@ export default function App() {
           muted={muted} setMuted={setMuted}
           theme={theme} setTheme={setTheme}
           isFirstOpen={paramsIsFirstOpen}
-          onClose={() => { setShowParams(false); setParamsIsFirstOpen(false) }} />
-      )}
-      {showWin && winner && (
-        <WinModal winner={winner.name} score={winner.score} t={t}
-          onRestart={() => { setShowWin(false); restart() }} onClose={() => setShowWin(false)} />
+          onClose={() => { setShowParams(false); setParamsIsFirstOpen(false) }}
+        />
       )}
 
-      {/* TOP BAR */}
+      {showWin && winner && (
+        <WinModal winner={winner.name} score={winner.score} t={t}
+          onRestart={() => { setShowWin(false); restart() }}
+          onClose={() => setShowWin(false)}
+        />
+      )}
+
+      {/* ── Top bar ──────────────────────────────────────────────────────── */}
       <div style={{ ...panel, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
         <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '.02em' }}>Formidable</span>
         <span style={{
@@ -588,10 +475,10 @@ export default function App() {
         </div>
       </div>
 
-      {/* MAIN AREA: two-col on desktop, single col on mobile */}
+      {/* ── Main area: two-col on desktop, single col on mobile ──────────── */}
       <div className="main-area">
 
-        {/* Board column — first in DOM so it appears on top on mobile */}
+        {/* Board column */}
         <div className="left-col">
           <div className="scores-mobile">{scores_row}</div>
           <div className="hand-mobile">{hand_panel}</div>
@@ -606,7 +493,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* Sidebar — second in DOM (below board on mobile, left on desktop via CSS order) */}
+        {/* Sidebar */}
         <div className="sidebar">
           <div className="scores-desktop">{scores_row}</div>
           <div className="hand-desktop">{hand_panel}</div>

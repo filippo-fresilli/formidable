@@ -1,6 +1,8 @@
 /**
  * Shared inline-style factories used across panel components.
- * These mirror the CSS token scale defined in index.css.
+ * Font weights use numeric literals (matching the CSS token values in index.css)
+ * so TypeScript doesn't need casts. The CSS vars (--fw-bold etc.) remain the
+ * canonical reference for CSS-class usage.
  */
 import type React from 'react'
 
@@ -15,7 +17,7 @@ export const panel: React.CSSProperties = {
 /** Section label (UPPERCASE, muted, small caps) */
 export const sectionHeader: React.CSSProperties = {
   fontSize: 'var(--font-sm)',
-  fontWeight: 'var(--fw-bold)' as unknown as number,
+  fontWeight: 700,
   color: 'var(--text-secondary)',
   marginBottom: 7,
   textTransform: 'uppercase',
@@ -27,7 +29,7 @@ export const actionBtn = (bg: string, color = '#fff'): React.CSSProperties => ({
   width: '100%', padding: '9px 0', borderRadius: 'var(--radius-md)', border: 'none',
   background: bg, color, cursor: 'pointer',
   fontSize: 'var(--font-md)', marginBottom: 6,
-  fontFamily: 'inherit', fontWeight: 'var(--fw-semibold)' as unknown as number,
+  fontFamily: 'inherit', fontWeight: 600,
 })
 
 /** Square/pill navigation button (undo, redo, help, settings) */
@@ -37,7 +39,6 @@ export const navBtn = (enabled: boolean): React.CSSProperties => ({
   background: enabled ? 'var(--bg-nav-enabled)' : 'var(--bg-nav-disabled)',
   color: enabled ? 'var(--text-nav-enabled)' : 'var(--text-nav-disabled)',
   cursor: enabled ? 'pointer' : 'default',
-  fontSize: 'var(--font-md)', fontFamily: 'inherit',
-  fontWeight: 'var(--fw-semibold)' as unknown as number,
+  fontSize: 'var(--font-md)', fontFamily: 'inherit', fontWeight: 500,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
 })

@@ -22,7 +22,7 @@ export function TopBar({
 }: TopBarProps) {
   return (
     <div style={{ ...panel, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-      <span style={{ fontSize: 'var(--font-lg)', fontWeight: 'var(--fw-extrabold)' as unknown as number, color: 'var(--text-primary)', letterSpacing: '.02em' }}>
+      <span style={{ fontSize: 'var(--font-lg)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '.02em' }}>
         Formidable
       </span>
       <span style={{
@@ -40,7 +40,7 @@ export function TopBar({
             borderRadius: 'var(--radius-sm)', padding: '0 12px', height: 44,
           }}>
             <span style={{
-              fontSize: 'var(--font-md)', fontWeight: 'var(--fw-bold)' as unknown as number,
+              fontSize: 'var(--font-md)', fontWeight: 700,
               fontVariantNumeric: 'tabular-nums',
               color: gameOver ? 'var(--timer-color-over)' : 'var(--timer-color)',
             }}>

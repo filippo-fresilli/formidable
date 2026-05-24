@@ -44,7 +44,7 @@ export function HandPanel({
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize: 'var(--font-base)', fontWeight: 'var(--fw-bold)' as unknown as number,
+            fontSize: 'var(--font-base)', fontWeight: 700,
             color: playerColor, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {handTitle}
@@ -56,10 +56,10 @@ export function HandPanel({
           </div>
         </div>
         <div style={{
-          fontSize: 'var(--font-3xl)', fontWeight: 'var(--fw-extrabold)' as unknown as number,
+          fontSize: 'var(--font-3xl)', fontWeight: 800,
           color: playerColor, lineHeight: 1, flexShrink: 0,
         }}>
-          {score}<span style={{ fontSize: 'var(--font-xs)', fontWeight: 'var(--fw-normal)' as unknown as number, color: 'var(--text-muted)' }}>/50</span>
+          {score}<span style={{ fontSize: 'var(--font-xs)', fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
         </div>
       </div>
 

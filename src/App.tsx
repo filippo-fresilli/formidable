@@ -7,6 +7,7 @@ import { playSound } from './game/sounds'
 import { PLAYER_COLORS, PLAYER_COLORS_DARK } from './game/constants'
 import type { HistoryState } from './game/types'
 import { useGame } from './game/useGame'
+import { useMediaQuery } from './ui/useMediaQuery'
 import { Board } from './components/Board'
 import { OnboardingModal } from './components/OnboardingModal'
 import { WinModal } from './components/WinModal'
@@ -17,19 +18,6 @@ import { ScoreCard } from './components/ScoreCard'
 import { HandPanel } from './components/HandPanel'
 import { ActionsPanel } from './components/ActionsPanel'
 import { HistoryPanel } from './components/HistoryPanel'
-
-function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(() =>
-    typeof window !== 'undefined' ? window.matchMedia(query).matches : false
-  )
-  useEffect(() => {
-    const mq = window.matchMedia(query)
-    const handler = (e: MediaQueryListEvent) => setMatches(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [query])
-  return matches
-}
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -85,9 +73,10 @@ export default function App() {
 
   // ── Game logic ────────────────────────────────────────────────────────────
   const {
-    gs, dispatch,
+    gs,
     busy, canBack, canFwd,
-    placeCard, placeMeeple, skipMeeple, playerWithdraw, selectCard, restart: gameRestart,
+    placeCard, placeMeeple, skipMeeple, playerWithdraw, selectCard,
+    restart: gameRestart, undo, redo,
   } = useGame({
     initialState,
     numPlayersRef,
@@ -208,7 +197,7 @@ export default function App() {
       {showResume && (
         <ModalShell maxWidth={360} padding={32} textAlign="center">
           <div style={{ fontSize: 48, marginBottom: 12 }}>💾</div>
-          <h2 style={{ fontSize: 'var(--font-2xl)', fontWeight: 'var(--fw-extrabold)' as unknown as number, color: 'var(--text-primary)', marginBottom: 8 }}>
+          <h2 style={{ fontSize: 'var(--font-2xl)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
             {t.resumeTitle}
           </h2>
           <p style={{ fontSize: 'var(--font-md)', color: 'var(--text-secondary)', marginBottom: 24 }}>
@@ -218,7 +207,7 @@ export default function App() {
             <button className="btn-primary" onClick={() => { setShowResume(false); setTimerActive(true) }} style={{
               flex: 1, padding: '11px 0', borderRadius: 'var(--radius-md)', border: 'none',
               background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
-              fontSize: 'var(--font-md)', fontWeight: 'var(--fw-bold)' as unknown as number, fontFamily: 'inherit',
+              fontSize: 'var(--font-md)', fontWeight: 700, fontFamily: 'inherit',
             }}>
               {t.resume}
             </button>
@@ -324,8 +313,8 @@ export default function App() {
             busy={busy}
             muted={muted}
             label={t.history}
-            onUndo={() => dispatch({ type: 'UNDO' })}
-            onRedo={() => dispatch({ type: 'REDO' })}
+            onUndo={undo}
+            onRedo={redo}
           />
         </div>
 

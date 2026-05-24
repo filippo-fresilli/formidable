@@ -185,10 +185,11 @@ export function useGame({
     if (newGame.turn !== 0) setTimeout(() => executeCpu(newGame), 800)
   }
 
+  function undo() { dispatch({ type: 'UNDO' }) }
+  function redo() { dispatch({ type: 'REDO' }) }
+
   return {
     gs,
-    hist,
-    dispatch,
     busy: cpuBusy || cpuRef.current,
     cpuBusy,
     canBack: hist.past.length > 0,
@@ -199,5 +200,7 @@ export function useGame({
     playerWithdraw,
     selectCard,
     restart,
+    undo,
+    redo,
   }
 }

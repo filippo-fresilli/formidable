@@ -5,8 +5,10 @@ interface ModalShellProps {
   maxWidth?: number
   padding?: number
   textAlign?: 'center' | 'left'
-  /** When provided, renders an ✕ button and closes on overlay click */
+  /** When provided, closes on overlay click (and renders ✕ unless hideCloseButton is true) */
   onClose?: () => void
+  /** Suppress the built-in ✕ button (overlay-click still works) */
+  hideCloseButton?: boolean
   /** Position of the ✕ button (default 'right') */
   closeAlign?: 'left' | 'right'
 }
@@ -16,7 +18,7 @@ interface ModalShellProps {
  * Clicking the overlay (outside the card) calls onClose when provided.
  */
 export function ModalShell({
-  children, maxWidth = 400, padding = 32, textAlign, onClose, closeAlign = 'right',
+  children, maxWidth = 400, padding = 32, textAlign, onClose, hideCloseButton = false, closeAlign = 'right',
 }: ModalShellProps) {
   return (
     <div
@@ -35,7 +37,7 @@ export function ModalShell({
           ...(textAlign ? { textAlign } : {}),
         }}
       >
-        {onClose && (
+        {onClose && !hideCloseButton && (
           <button className="btn-icon" onClick={onClose} style={{
             position: 'absolute', top: 14,
             ...(closeAlign === 'left' ? { left: 16 } : { right: 16 }),

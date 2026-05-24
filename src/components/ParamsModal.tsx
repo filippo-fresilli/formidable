@@ -143,8 +143,16 @@ export function ParamsModal({
   )
 
   return (
-    <ModalShell maxWidth={360} padding={28} onClose={isFirstOpen ? undefined : onClose}>
-      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20, paddingRight: 32 }}>{t.params}</h2>
+    <ModalShell maxWidth={360} padding={28} onClose={isFirstOpen ? undefined : onClose} hideCloseButton>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
+        <h2 style={{ flex: 1, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>{t.params}</h2>
+        {!isFirstOpen && (
+          <button onClick={onClose} style={{
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: 20, color: 'var(--text-faint)', padding: 4, lineHeight: 1,
+          }}>✕</button>
+        )}
+      </div>
       {sec(t.playerNameLabel, (
         <input
           type="text"

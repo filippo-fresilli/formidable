@@ -73,9 +73,9 @@ export function Board({
           <filter id="card-shadow" x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation="3" />
           </filter>
-          {/* Deeper shadow for stacked (conquered) cards */}
-          <filter id="card-shadow-deep" x="-40%" y="-40%" width="180%" height="180%">
-            <feGaussianBlur stdDeviation="5" />
+          {/* Elevation shadow for conquered (stacked) cards */}
+          <filter id="card-elevated" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="4" stdDeviation="0" floodColor="var(--stack-shadow)" floodOpacity="1" />
           </filter>
         </defs>
         {/* Pass 1: shadows only — drawn first so cards cover them */}
@@ -91,13 +91,14 @@ export function Board({
           )
         })}
 
-        {/* Pass 2: full card rendering on top of all shadows */}
+        {/* Pass 2: layer 0 (empty cells) + layer 1 (normal cards) */}
         {ALL_CELLS.map(({ q, r }) => {
           const { x, y } = toPixel(q, r)
           const k = ck(q, r)
           const card = board[k]
           const meep = meeples[k]
           const isConq = !!conquered[k]
+          if (isConq) return null   // conquered cards rendered in Pass 3
           const inset = hr * 0.78
 
           type HlType = 'none' | 'place' | 'conquer' | 'withdraw'
@@ -128,13 +129,6 @@ export function Board({
 
           return (
             <g key={k} onClick={onClick ?? undefined} style={{ cursor: onClick ? 'pointer' : 'default' }}>
-              {/* Stacked-card effect: offset layer peeking below + stronger shadow */}
-              {isConq && card && (
-                <polygon
-                  points={hexPoints(x, y + hr * 0.12, hr - 1)}
-                  style={{ fill: COLOR_HEX[card.oc], opacity: 0.45, stroke: 'none', filter: 'url(#card-shadow-deep)' }}
-                />
-              )}
               <polygon points={hexPoints(x, y, hr - 0.5)} style={{ fill, stroke, strokeWidth: sw }} />
               {card && (
                 <>
@@ -142,15 +136,45 @@ export function Board({
                   <InnerShape shape={card.is} cx={x} cy={y} inset={inset} fill={COLOR_HEX[card.ic]} stroke={COLOR_STROKE[card.ic]} strokeWidth={hr * 0.08} />
                 </>
               )}
-              {isConq && meep === undefined && (
+              {meep !== undefined && (
+                <MeepleIcon cx={x + hr * 0.44} cy={y - hr * 0.42} size={hr * 0.65} fill={playerColors[meep]} />
+              )}
+            </g>
+          )
+        })}
+
+        {/* Pass 3: layer 2 — conquered (stacked) cards, always on top */}
+        {ALL_CELLS.map(({ q, r }) => {
+          const { x, y } = toPixel(q, r)
+          const k = ck(q, r)
+          const card = board[k]
+          const meep = meeples[k]
+          const isConq = !!conquered[k]
+          if (!isConq || !card) return null
+          const inset = hr * 0.78
+
+          let onClick: (() => void) | null = null
+          let hl: 'none' | 'withdraw' = 'none'
+          if (!gameOver && (phase === 'withdraw' || phase === 'meeple') && meep === 0) {
+            hl = 'withdraw'; onClick = () => onWithdraw(q, r)
+          }
+
+          let fill = COLOR_HEX[card.oc]
+          let stroke = 'var(--board-card-stroke)'
+          let sw = 0.6
+          if (hl === 'withdraw') { fill = 'var(--withdraw-fill)'; stroke = 'var(--withdraw-stroke)'; sw = 2.5 }
+
+          return (
+            <g key={`conq-${k}`} onClick={onClick ?? undefined} style={{ cursor: onClick ? 'pointer' : 'default' }}
+              filter="url(#card-elevated)" transform="translate(0,-4)">
+              <polygon points={hexPoints(x, y, hr - 0.5)} style={{ fill, stroke, strokeWidth: sw }} />
+              <OuterShape shape={card.os} cx={x} cy={y} inset={inset} fill="white" stroke={COLOR_STROKE[card.oc]} strokeWidth={hr * 0.08} />
+              <InnerShape shape={card.is} cx={x} cy={y} inset={inset} fill={COLOR_HEX[card.ic]} stroke={COLOR_STROKE[card.ic]} strokeWidth={hr * 0.08} />
+              {meep === undefined && (
                 <circle cx={x + hr * 0.4} cy={y - hr * 0.4} r={hr * 0.18} fill="var(--color-danger)" opacity={0.8} />
               )}
               {meep !== undefined && (
-                <MeepleIcon
-                  cx={x + hr * 0.44} cy={y - hr * 0.42}
-                  size={hr * 0.65}
-                  fill={playerColors[meep]}
-                />
+                <MeepleIcon cx={x + hr * 0.44} cy={y - hr * 0.42} size={hr * 0.65} fill={playerColors[meep]} />
               )}
             </g>
           )

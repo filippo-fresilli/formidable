@@ -87,9 +87,11 @@
   /* board highlight — withdraw */
   --withdraw-fill:        #ffe066;
   --withdraw-stroke:      #e6a800;
+  --stack-shadow:         rgba(0,0,0,1);
 }
 
 [data-theme="dark"] {
+  --stack-shadow:         rgba(0,0,0,1);
   /* surfaces */
   --bg-app:               #0f1923;
   --bg-panel:             #1a2535;

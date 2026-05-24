@@ -59,8 +59,8 @@ export function ParamsModal({
   )
 
   return (
-    <ModalShell maxWidth={360} padding={28}>
-      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20 }}>{t.params}</h2>
+    <ModalShell maxWidth={360} padding={28} onClose={isFirstOpen ? undefined : onClose} closeAlign="left">
+      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20, paddingLeft: 32 }}>{t.params}</h2>
       {sec(t.playerNameLabel, (
         <input
           type="text"
@@ -119,19 +119,11 @@ export function ParamsModal({
           fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
         }}>{t.letsGo}</button>
       ) : (
-        <>
-          <button className="btn-primary" onClick={() => { onRestart(); onClose() }} style={{
-            width: '100%', padding: 10, borderRadius: 10, border: 'none',
-            background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
-            fontSize: 14, fontWeight: 700, fontFamily: 'inherit', marginBottom: 10,
-          }}>{t.restart}</button>
-          <button className="btn-ghost" onClick={onClose} style={{
-            width: '100%', padding: 10, borderRadius: 10,
-            border: '1px solid var(--border-default)', background: 'var(--bg-panel-alt)',
-            color: 'var(--text-secondary)',
-            cursor: 'pointer', fontSize: 14, fontFamily: 'inherit',
-          }}>{t.close}</button>
-        </>
+        <button className="btn-primary" onClick={() => { onRestart(); onClose() }} style={{
+          width: '100%', padding: 10, borderRadius: 10, border: 'none',
+          background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
+          fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+        }}>{t.restart}</button>
       )}
       <p style={{
         margin: '16px 0 0', fontSize: 11, color: 'var(--text-faint)',

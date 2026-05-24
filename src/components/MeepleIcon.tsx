@@ -4,7 +4,7 @@ export const MEEPLE_PATH = "M8.00005 1.71875C7.1563 1.71875 6.54949 2.16522 6.19
 // Inline SVG meeple for use in HTML (score panel, hand, etc.)
 export function MeepleInline({ color, filled, size = 14 }: { color: string; filled: boolean; size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" style={{ display: 'block', flexShrink: 0 }}>
+    <svg width={size} height={size} viewBox="0 0 16 16" style={{ display: 'block', flexShrink: 0, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.4))' }}>
       <path
         d={MEEPLE_PATH}
         fill={filled ? color : 'none'}

@@ -25,7 +25,7 @@ function MeepleIcon({ cx, cy, size, fill }: { cx: number; cy: number; size: numb
   const f = size / 16
   return (
     <g transform={`translate(${cx - 8 * f},${cy - 8 * f}) scale(${f})`}>
-      <path d={MEEPLE_PATH} fill={fill} stroke="white" strokeWidth={0.8 / f} />
+      <path d={MEEPLE_PATH} fill={fill} stroke="white" strokeWidth={0.8 / f} style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.55))' }} />
     </g>
   )
 }

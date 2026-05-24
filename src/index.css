@@ -3,6 +3,34 @@
 /* ── Theme tokens ────────────────────────────────────────────────────────────── */
 
 :root {
+  /* ── Typography scale ── */
+  --font-xs:        11px;
+  --font-sm:        12px;
+  --font-base:      13px;
+  --font-md:        14px;
+  --font-lg:        16px;
+  --font-xl:        18px;
+  --font-2xl:       20px;
+  --font-3xl:       22px;
+
+  --fw-normal:      400;
+  --fw-semibold:    600;
+  --fw-bold:        700;
+  --fw-extrabold:   800;
+
+  /* ── Spacing & radius scale ── */
+  --radius-xs:      4px;
+  --radius-sm:      8px;
+  --radius-md:      10px;
+  --radius-lg:      12px;
+  --radius-xl:      16px;
+
+  --gap-1:          4px;
+  --gap-2:          6px;
+  --gap-3:          8px;
+  --gap-4:          12px;
+  --gap-5:          16px;
+
   /* ── Semantic color tokens ── */
   --color-primary:          #1E7FFF;
   --color-primary-subtle:   #1E7FFF22;
@@ -235,7 +263,7 @@ button { -webkit-tap-highlight-color: transparent; }
   gap: 10px;
   padding: 6px 2px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--font-base);
 }
 
 .bot-thinking__dots {

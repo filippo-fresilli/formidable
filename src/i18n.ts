@@ -17,10 +17,10 @@ export interface I18nDict {
   soundOn: string; soundOff: string; themeLight: string; themeDark: string
   playerNameLabel: string
   playerNamePlaceholder: string
-  statsTitle: string
-  statsGamesPlayed: string; statsGamesWon: string; statsBestScore: string
-  statsAvgScore: string; statsAvgTurns: string; statsFastestWin: string
-  statsNoData: string; statsLabel: string
+  statsTitle: string; statsLabel: string; statsNoData: string
+  statsGameSection: string; statsPlayerSection: string
+  statsGamesPlayed: string; statsAvgTurns: string; statsAvgTotalScore: string
+  statsGamesWon: string; statsBestScore: string; statsAvgScore: string; statsFastestWin: string; statsWinRate: string
   diffLabels: Record<'easy' | 'medium' | 'hard', string>
   shapeNames: Record<'T' | 'Q' | 'C', string>
   colorNames: Record<'B' | 'R' | 'G', string>
@@ -48,11 +48,11 @@ export const I18N: Record<Lang, I18nDict> = {
     credits: 'Gioco realizzato e testato da Filippo Fresilli e Stefano Spensieri',
     difficulty: 'Difficoltà bot', playerNameLabel: 'Il tuo nome', playerNamePlaceholder: 'Giocatore 1',
     soundOn: '🔊 Suono', soundOff: '🔇 Muto', themeLight: '☀️ Chiaro', themeDark: '🌙 Scuro',
-    statsTitle: 'Statistiche', statsLabel: '📊 Statistiche',
-    statsGamesPlayed: 'Partite giocate', statsGamesWon: 'Partite vinte',
-    statsBestScore: 'Miglior punteggio', statsAvgScore: 'Punteggio medio',
-    statsAvgTurns: 'Turni medi', statsFastestWin: 'Vittoria più rapida',
-    statsNoData: 'Nessuna partita giocata ancora.',
+    statsTitle: 'Statistiche', statsLabel: '📊 Statistiche', statsNoData: 'Nessuna partita giocata ancora.',
+    statsGameSection: 'Statistiche del gioco', statsPlayerSection: 'Statistiche del giocatore',
+    statsGamesPlayed: 'Partite giocate', statsAvgTurns: 'Turni medi', statsAvgTotalScore: 'Punteggio totale medio',
+    statsGamesWon: 'Partite vinte', statsBestScore: 'Miglior punteggio', statsAvgScore: 'Punteggio medio',
+    statsFastestWin: 'Vittoria più rapida', statsWinRate: 'Percentuale vittorie',
     diffLabels: { easy: '😌 Facile', medium: '🤔 Medio', hard: '🔥 Difficile' },
     shapeNames: { T: 'Triangolo', Q: 'Quadrato', C: 'Cerchio' },
     colorNames: { B: 'Blu', R: 'Rosso', G: 'Verde' },
@@ -82,11 +82,11 @@ export const I18N: Record<Lang, I18nDict> = {
     credits: 'Game designed and tested by Filippo Fresilli and Stefano Spensieri',
     difficulty: 'Bot difficulty', playerNameLabel: 'Your name', playerNamePlaceholder: 'Player 1',
     soundOn: '🔊 Sound', soundOff: '🔇 Muted', themeLight: '☀️ Light', themeDark: '🌙 Dark',
-    statsTitle: 'Statistics', statsLabel: '📊 Statistics',
-    statsGamesPlayed: 'Games played', statsGamesWon: 'Games won',
-    statsBestScore: 'Best score', statsAvgScore: 'Average score',
-    statsAvgTurns: 'Average turns', statsFastestWin: 'Fastest win',
-    statsNoData: 'No games played yet.',
+    statsTitle: 'Statistics', statsLabel: '📊 Statistics', statsNoData: 'No games played yet.',
+    statsGameSection: 'Game statistics', statsPlayerSection: 'Player statistics',
+    statsGamesPlayed: 'Games played', statsAvgTurns: 'Average turns', statsAvgTotalScore: 'Average total score',
+    statsGamesWon: 'Games won', statsBestScore: 'Best score', statsAvgScore: 'Average score',
+    statsFastestWin: 'Fastest win', statsWinRate: 'Win rate',
     diffLabels: { easy: '😌 Easy', medium: '🤔 Medium', hard: '🔥 Hard' },
     shapeNames: { T: 'Triangle', Q: 'Square', C: 'Circle' },
     colorNames: { B: 'Blue', R: 'Red', G: 'Green' },
@@ -116,11 +116,11 @@ export const I18N: Record<Lang, I18nDict> = {
     credits: 'Jeu conçu et testé par Filippo Fresilli et Stefano Spensieri',
     difficulty: 'Difficulté bot', playerNameLabel: 'Ton nom', playerNamePlaceholder: 'Joueur 1',
     soundOn: '🔊 Son', soundOff: '🔇 Muet', themeLight: '☀️ Clair', themeDark: '🌙 Sombre',
-    statsTitle: 'Statistiques', statsLabel: '📊 Statistiques',
-    statsGamesPlayed: 'Parties jouées', statsGamesWon: 'Parties gagnées',
-    statsBestScore: 'Meilleur score', statsAvgScore: 'Score moyen',
-    statsAvgTurns: 'Tours moyens', statsFastestWin: 'Victoire la plus rapide',
-    statsNoData: 'Aucune partie jouée encore.',
+    statsTitle: 'Statistiques', statsLabel: '📊 Statistiques', statsNoData: 'Aucune partie jouée encore.',
+    statsGameSection: 'Statistiques du jeu', statsPlayerSection: 'Statistiques du joueur',
+    statsGamesPlayed: 'Parties jouées', statsAvgTurns: 'Tours moyens', statsAvgTotalScore: 'Score total moyen',
+    statsGamesWon: 'Parties gagnées', statsBestScore: 'Meilleur score', statsAvgScore: 'Score moyen',
+    statsFastestWin: 'Victoire la plus rapide', statsWinRate: 'Taux de victoire',
     diffLabels: { easy: '😌 Facile', medium: '🤔 Moyen', hard: '🔥 Difficile' },
     shapeNames: { T: 'Triangle', Q: 'Carré', C: 'Cercle' },
     colorNames: { B: 'Bleu', R: 'Rouge', G: 'Vert' },

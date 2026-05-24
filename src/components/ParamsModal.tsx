@@ -43,15 +43,27 @@ interface ParamsModalProps {
   onClose: () => void
 }
 
+// ── Simulation data (1000 games, medium difficulty) ───────────────────────────
+
+const SIM_DATA = [
+  { players: '2p', avgTurns: 29, range: '15–45', avgPts: 46, winChance: '50%' },
+  { players: '3p', avgTurns: 39, range: '22–62', avgPts: 42, winChance: '33%' },
+  { players: '4p', avgTurns: 48, range: '23–56', avgPts: 39, winChance: '25%' },
+]
+
 // ── Stats view ─────────────────────────────────────────────────────────────────
 
-function SectionHeader({ label }: { label: string }) {
+function SectionHeader({ label, subtitle }: { label: string; subtitle?: string }) {
   return (
-    <div style={{
-      fontSize: 11, fontWeight: 700, color: 'var(--text-muted)',
-      textTransform: 'uppercase', letterSpacing: '.06em',
-      marginTop: 18, marginBottom: 6,
-    }}>{label}</div>
+    <div style={{ marginTop: 18, marginBottom: 8 }}>
+      <div style={{
+        fontSize: 11, fontWeight: 700, color: 'var(--text-muted)',
+        textTransform: 'uppercase', letterSpacing: '.06em',
+      }}>{label}</div>
+      {subtitle && (
+        <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{subtitle}</div>
+      )}
+    </div>
   )
 }
 
@@ -67,18 +79,50 @@ function StatRow({ label, value }: { label: string; value: string | number }) {
   )
 }
 
+function SimTable({ t }: { t: I18nDict }) {
+  const cols = [t.statsSimAvgTurns, t.statsSimRange, t.statsSimAvgPts, t.statsSimWinChance]
+  const cellStyle = (bold?: boolean): React.CSSProperties => ({
+    fontSize: 12, textAlign: 'center', padding: '6px 4px',
+    color: bold ? 'var(--text-primary)' : 'var(--text-secondary)',
+    fontWeight: bold ? 700 : 400,
+  })
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
+        <thead>
+          <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
+            <th style={{ ...cellStyle(), textAlign: 'left', paddingLeft: 0 }}></th>
+            {cols.map(c => (
+              <th key={c} style={{ ...cellStyle(), fontWeight: 600, color: 'var(--text-muted)', fontSize: 11 }}>{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {SIM_DATA.map(row => (
+            <tr key={row.players} style={{ borderBottom: '1px solid var(--border-default)' }}>
+              <td style={{ ...cellStyle(true), textAlign: 'left', paddingLeft: 0 }}>{row.players}</td>
+              <td style={cellStyle()}>{row.avgTurns}</td>
+              <td style={cellStyle()}>{row.range}</td>
+              <td style={cellStyle()}>{row.avgPts} pt</td>
+              <td style={cellStyle()}>{row.winChance}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
 function StatsView({ t, onBack, onClose }: { t: I18nDict; onBack: () => void; onClose: () => void }) {
   const s = loadStats()
   const hasData = s.gamesPlayed > 0
-
-  const avgTurns      = hasData ? Math.round(s.totalTurns / s.gamesPlayed) : '—'
-  const avgTotalScore = hasData ? (s.totalScore / s.gamesPlayed).toFixed(1) : '—'
-  const winRate       = hasData ? `${Math.round((s.gamesWon / s.gamesPlayed) * 100)}%` : '—'
-  const avgScore      = hasData ? (s.totalScore / s.gamesPlayed).toFixed(1) : '—'
+  const avgTurns = hasData ? Math.round(s.totalTurns / s.gamesPlayed) : '—'
+  const winRate  = hasData ? `${Math.round((s.gamesWon / s.gamesPlayed) * 100)}%` : '—'
+  const avgScore = hasData ? (s.totalScore / s.gamesPlayed).toFixed(1) : '—'
 
   return (
     <ModalShell maxWidth={360} padding={28} onClose={undefined}>
-      {/* Custom header: ← | title | ✕ */}
+      {/* Header: chevron | title | ✕ */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
         <button onClick={onBack} style={{
           background: 'none', border: 'none', cursor: 'pointer',
@@ -97,26 +141,25 @@ function StatsView({ t, onBack, onClose }: { t: I18nDict; onBack: () => void; on
         }}>✕</button>
       </div>
 
-      {!hasData ? (
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', margin: '32px 0' }}>
-          {t.statsNoData}
-        </p>
-      ) : (
-        <>
-          {/* ── Statistiche del gioco ── */}
-          <SectionHeader label={t.statsGameSection} />
-          <StatRow label={t.statsGamesPlayed} value={s.gamesPlayed} />
-          <StatRow label={t.statsAvgTurns} value={avgTurns} />
-          <StatRow label={t.statsAvgTotalScore} value={avgTotalScore} />
+      {/* ── Statistiche del gioco (hardcoded simulation results) ── */}
+      <SectionHeader label={t.statsGameSection} subtitle={t.statsSimSubtitle} />
+      <SimTable t={t} />
 
-          {/* ── Statistiche del giocatore ── */}
-          <SectionHeader label={t.statsPlayerSection} />
-          <StatRow label={t.statsGamesWon} value={s.gamesWon} />
-          <StatRow label={t.statsWinRate} value={winRate} />
-          <StatRow label={t.statsBestScore} value={s.bestScore} />
-          <StatRow label={t.statsAvgScore} value={avgScore} />
+      {/* ── Statistiche del giocatore (localStorage) ── */}
+      <SectionHeader label={t.statsPlayerSection} />
+      {hasData ? (
+        <>
+          <StatRow label={t.statsGamesPlayed} value={s.gamesPlayed} />
+          <StatRow label={t.statsGamesWon} value={`${s.gamesWon} (${winRate})`} />
+          <StatRow label={t.statsBestScore} value={`${s.bestScore} pt`} />
+          <StatRow label={t.statsAvgScore} value={`${avgScore} pt`} />
+          <StatRow label={t.statsAvgTurns} value={avgTurns} />
           <StatRow label={t.statsFastestWin} value={s.fastestWin !== null ? `${s.fastestWin} turni` : '—'} />
         </>
+      ) : (
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', margin: '16px 0' }}>
+          {t.statsNoData}
+        </p>
       )}
     </ModalShell>
   )

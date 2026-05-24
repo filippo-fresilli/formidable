@@ -19,6 +19,8 @@ export interface I18nDict {
   playerNamePlaceholder: string
   statsTitle: string; statsLabel: string; statsNoData: string
   statsGameSection: string; statsPlayerSection: string
+  statsSimSubtitle: string
+  statsSimAvgTurns: string; statsSimRange: string; statsSimAvgPts: string; statsSimWinChance: string
   statsGamesPlayed: string; statsAvgTurns: string; statsAvgTotalScore: string
   statsGamesWon: string; statsBestScore: string; statsAvgScore: string; statsFastestWin: string; statsWinRate: string
   diffLabels: Record<'easy' | 'medium' | 'hard', string>
@@ -50,6 +52,8 @@ export const I18N: Record<Lang, I18nDict> = {
     soundOn: '🔊 Suono', soundOff: '🔇 Muto', themeLight: '☀️ Chiaro', themeDark: '🌙 Scuro',
     statsTitle: 'Statistiche', statsLabel: '📊 Statistiche', statsNoData: 'Nessuna partita giocata ancora.',
     statsGameSection: 'Statistiche del gioco', statsPlayerSection: 'Statistiche del giocatore',
+    statsSimSubtitle: '1.000 partite simulate · difficoltà media',
+    statsSimAvgTurns: 'Turni medi', statsSimRange: 'Durata (min–max)', statsSimAvgPts: 'Punteggio medio', statsSimWinChance: 'Prob. vittoria',
     statsGamesPlayed: 'Partite giocate', statsAvgTurns: 'Turni medi', statsAvgTotalScore: 'Punteggio totale medio',
     statsGamesWon: 'Partite vinte', statsBestScore: 'Miglior punteggio', statsAvgScore: 'Punteggio medio',
     statsFastestWin: 'Vittoria più rapida', statsWinRate: 'Percentuale vittorie',
@@ -84,6 +88,8 @@ export const I18N: Record<Lang, I18nDict> = {
     soundOn: '🔊 Sound', soundOff: '🔇 Muted', themeLight: '☀️ Light', themeDark: '🌙 Dark',
     statsTitle: 'Statistics', statsLabel: '📊 Statistics', statsNoData: 'No games played yet.',
     statsGameSection: 'Game statistics', statsPlayerSection: 'Player statistics',
+    statsSimSubtitle: '1,000 simulated games · medium difficulty',
+    statsSimAvgTurns: 'Avg turns', statsSimRange: 'Length (min–max)', statsSimAvgPts: 'Avg score', statsSimWinChance: 'Win chance',
     statsGamesPlayed: 'Games played', statsAvgTurns: 'Average turns', statsAvgTotalScore: 'Average total score',
     statsGamesWon: 'Games won', statsBestScore: 'Best score', statsAvgScore: 'Average score',
     statsFastestWin: 'Fastest win', statsWinRate: 'Win rate',
@@ -118,6 +124,8 @@ export const I18N: Record<Lang, I18nDict> = {
     soundOn: '🔊 Son', soundOff: '🔇 Muet', themeLight: '☀️ Clair', themeDark: '🌙 Sombre',
     statsTitle: 'Statistiques', statsLabel: '📊 Statistiques', statsNoData: 'Aucune partie jouée encore.',
     statsGameSection: 'Statistiques du jeu', statsPlayerSection: 'Statistiques du joueur',
+    statsSimSubtitle: '1 000 parties simulées · difficulté moyenne',
+    statsSimAvgTurns: 'Tours moyens', statsSimRange: 'Durée (min–max)', statsSimAvgPts: 'Score moyen', statsSimWinChance: 'Prob. de victoire',
     statsGamesPlayed: 'Parties jouées', statsAvgTurns: 'Tours moyens', statsAvgTotalScore: 'Score total moyen',
     statsGamesWon: 'Parties gagnées', statsBestScore: 'Meilleur score', statsAvgScore: 'Score moyen',
     statsFastestWin: 'Victoire la plus rapide', statsWinRate: 'Taux de victoire',

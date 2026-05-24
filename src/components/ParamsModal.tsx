@@ -59,8 +59,8 @@ export function ParamsModal({
   )
 
   return (
-    <ModalShell maxWidth={360} padding={28} onClose={isFirstOpen ? undefined : onClose} closeAlign="left">
-      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20, paddingLeft: 32 }}>{t.params}</h2>
+    <ModalShell maxWidth={360} padding={28} onClose={isFirstOpen ? undefined : onClose}>
+      <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20, paddingRight: 32 }}>{t.params}</h2>
       {sec(t.playerNameLabel, (
         <input
           type="text"

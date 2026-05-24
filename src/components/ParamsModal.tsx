@@ -11,9 +11,9 @@ function ToggleGroup<T extends string | number>({
       {options.map(({ id, label }) => (
         <button key={String(id)} className="btn-toggle" data-selected={selected === id} onClick={() => onSelect(id)} style={{
           flex: 1, padding: '10px 0', borderRadius: 10,
-          border: `2px solid ${selected === id ? '#1E7FFF' : 'var(--border-default)'}`,
-          background: selected === id ? '#1E7FFF22' : 'var(--bg-panel-alt)',
-          color: selected === id ? '#1E7FFF' : 'var(--text-secondary)',
+          border: `2px solid ${selected === id ? 'var(--color-primary)' : 'var(--border-default)'}`,
+          background: selected === id ? 'var(--color-primary-subtle)' : 'var(--bg-panel-alt)',
+          color: selected === id ? 'var(--color-primary)' : 'var(--text-secondary)',
           cursor: 'pointer', fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
         }}>{label}</button>
       ))}
@@ -80,7 +80,7 @@ export function ParamsModal({
               color: 'var(--text-primary)', fontSize: 14, fontFamily: 'inherit',
               outline: 'none', transition: 'border-color 0.15s',
             }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = '#1E7FFF' }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)' }}
             onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--border-default)' }}
           />
         ))}
@@ -105,9 +105,9 @@ export function ParamsModal({
         <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
           <button onClick={() => setMuted(!muted)} style={{
             flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
-            border: `2px solid ${muted ? 'var(--border-default)' : '#1E7FFF'}`,
-            background: muted ? 'var(--bg-panel-alt)' : '#1E7FFF22',
-            color: muted ? 'var(--text-secondary)' : '#1E7FFF',
+            border: `2px solid ${muted ? 'var(--border-default)' : 'var(--color-primary)'}`,
+            background: muted ? 'var(--bg-panel-alt)' : 'var(--color-primary-subtle)',
+            color: muted ? 'var(--text-secondary)' : 'var(--color-primary)',
             fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
           }}>{muted ? t.soundOff : t.soundOn}</button>
           <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} style={{
@@ -121,14 +121,14 @@ export function ParamsModal({
         {isFirstOpen ? (
           <button className="btn-primary" onClick={onStart} style={{
             width: '100%', padding: 12, borderRadius: 10, border: 'none',
-            background: '#1E7FFF', color: '#fff', cursor: 'pointer',
+            background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
             fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
           }}>{t.letsGo}</button>
         ) : (
           <>
             <button className="btn-primary" onClick={() => { onRestart(); onClose() }} style={{
               width: '100%', padding: 10, borderRadius: 10, border: 'none',
-              background: '#FF6B35', color: '#fff', cursor: 'pointer',
+              background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
               fontSize: 14, fontWeight: 700, fontFamily: 'inherit', marginBottom: 10,
             }}>{t.restart}</button>
             <button className="btn-ghost" onClick={onClose} style={{

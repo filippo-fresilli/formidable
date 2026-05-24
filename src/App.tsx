@@ -370,7 +370,7 @@ export default function App() {
         {turn === 0 && !gameOver ? hands[0].map((c, i) => (
           <div key={i} className="btn-card" onClick={() => selectCard(i)} style={{
             flex: 1, borderRadius: 10,
-            border: `2px solid ${selIdx === i ? '#1E7FFF' : 'var(--border-default)'}`,
+            border: `2px solid ${selIdx === i ? 'var(--color-primary)' : 'var(--border-default)'}`,
             padding: isDesktop ? '12px 8px' : '10px 8px', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
             background: selIdx === i ? 'var(--bg-card-hand-sel)' : 'var(--bg-card-hand)',
@@ -408,13 +408,13 @@ export default function App() {
         <div style={{ display: 'flex', gap: 6 }}>
           {tokens[0] > 0 && placedPos && (
             <button className="btn-primary" onClick={placeMeeple}
-              style={{ ...btnS('#1E7FFF'), margin: 0, flex: 1 }}>
+              style={{ ...btnS('var(--color-primary)'), margin: 0, flex: 1 }}>
               {t.placeMeeple}
             </button>
           )}
           {singleKey && (
             <button className="btn-primary" onClick={() => playerWithdraw(sq, sr)}
-              style={{ ...btnS('#e6a800', '#1a1a00'), margin: 0, flex: 1 }}>
+              style={{ ...btnS('var(--color-warning)', '#1a1a00'), margin: 0, flex: 1 }}>
               {t.withdrawMeeple}
             </button>
           )}
@@ -441,7 +441,7 @@ export default function App() {
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: 8 }}>{t.hint}</div>
       )}
       <div style={{ paddingTop: 8, borderTop: '1px solid var(--border-subtle)', display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
-        {([['#cce4ff', t.placeable], ['#ffd0c0', t.conquerable], ['var(--withdraw-fill)', t.withdrawable]] as [string, string][]).map(([bg, label]) => (
+        {([['var(--place-fill)', t.placeable], ['var(--conquer-fill)', t.conquerable], ['var(--withdraw-fill)', t.withdrawable]] as [string, string][]).map(([bg, label]) => (
           <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-secondary)' }}>
             <span style={{ display: 'inline-block', width: 12, height: 12, background: bg, borderRadius: 3, flexShrink: 0 }} />
             <span>{label}</span>
@@ -507,7 +507,7 @@ export default function App() {
             <div style={{ display: 'flex', gap: 8 }}>
               <button className="btn-primary" onClick={() => { setShowResume(false); setTimerActive(true) }} style={{
                 flex: 1, padding: '11px 0', borderRadius: 10, border: 'none',
-                background: '#1E7FFF', color: '#fff', cursor: 'pointer',
+                background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
                 fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
               }}>
                 {t.resume}

@@ -3,6 +3,22 @@
 /* ── Theme tokens ────────────────────────────────────────────────────────────── */
 
 :root {
+  /* ── Semantic color tokens ── */
+  --color-primary:          #1E7FFF;
+  --color-primary-subtle:   #1E7FFF22;
+  --color-primary-bg:       #f0f4ff;
+  --color-danger:           #FF1010;
+  --color-danger-subtle:    #ffd0c0;
+  --color-accent:           #FF6B35;
+  --color-warning:          #e6a800;
+  --color-warning-subtle:   #ffe066;
+
+  /* board highlight — place / conquer */
+  --place-fill:             #cce4ff;
+  --place-stroke:           var(--color-primary);
+  --conquer-fill:           #ffd0c0;
+  --conquer-stroke:         var(--color-danger);
+
   /* surfaces */
   --bg-app:               #f0e8d0;
   --bg-panel:             #ffffff;
@@ -246,8 +262,8 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 .btn-nav:hover:not(:disabled) {
   background: var(--bg-nav-hover) !important;
-  border-color: #1E7FFF !important;
-  color: #1E7FFF !important;
+  border-color: var(--color-primary) !important;
+  color: var(--color-primary) !important;
 }
 .btn-nav:active:not(:disabled) {
   transform: scale(0.95);
@@ -297,7 +313,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .btn-toggle:not([data-selected='true']):hover {
   background: var(--bg-nav-hover) !important;
   border-color: #aac4ff !important;
-  color: #1E7FFF !important;
+  color: var(--color-primary) !important;
 }
 
 /* Selectable hand cards */

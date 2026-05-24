@@ -117,10 +117,10 @@ export function Board({
           let fill = card ? COLOR_HEX[card.oc] : 'var(--board-empty-fill)'
           let stroke = card ? 'var(--board-card-stroke)' : 'var(--board-empty-stroke)'
           let sw = 0.6
-          if (hl === 'place') { fill = '#cce4ff'; stroke = '#1E7FFF'; sw = 2 }
-          if (hl === 'conquer') { fill = '#ffd0c0'; stroke = '#FF1010'; sw = 2 }
+          if (hl === 'place') { fill = 'var(--place-fill)'; stroke = 'var(--place-stroke)'; sw = 2 }
+          if (hl === 'conquer') { fill = 'var(--conquer-fill)'; stroke = 'var(--conquer-stroke)'; sw = 2 }
           if (hl === 'withdraw') { fill = 'var(--withdraw-fill)'; stroke = 'var(--withdraw-stroke)'; sw = 2.5 }
-          if (placedPos && placedPos.q === q && placedPos.r === r) { stroke = '#1E7FFF'; sw = 2.5 }
+          if (placedPos && placedPos.q === q && placedPos.r === r) { stroke = 'var(--place-stroke)'; sw = 2.5 }
 
           return (
             <g key={k} onClick={onClick ?? undefined} style={{ cursor: onClick ? 'pointer' : 'default' }}>
@@ -132,7 +132,7 @@ export function Board({
                 </>
               )}
               {isConq && meep === undefined && (
-                <circle cx={x + hr * 0.4} cy={y - hr * 0.4} r={hr * 0.18} fill="#FF1010" opacity={0.8} />
+                <circle cx={x + hr * 0.4} cy={y - hr * 0.4} r={hr * 0.18} fill="var(--color-danger)" opacity={0.8} />
               )}
               {meep !== undefined && (
                 <MeepleIcon

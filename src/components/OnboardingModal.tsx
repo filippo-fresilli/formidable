@@ -25,7 +25,7 @@ export function OnboardingModal({ t, onClose, onStart }: { t: I18nDict; onClose:
           {steps.map((_, i) => (
             <div key={i} onClick={() => setStep(i)} style={{
               width: i === step ? 24 : 8, height: 8, borderRadius: 4,
-              background: i === step ? '#1E7FFF' : 'var(--border-default)',
+              background: i === step ? 'var(--color-primary)' : 'var(--border-default)',
               cursor: 'pointer', transition: 'all 0.2s',
             }} />
           ))}
@@ -47,7 +47,7 @@ export function OnboardingModal({ t, onClose, onStart }: { t: I18nDict; onClose:
           <span style={{ fontSize: 13, color: 'var(--text-faint)' }}>{step + 1}/{steps.length}</span>
           <button className="btn-primary" onClick={() => isLast ? (onStart ?? onClose)() : setStep((s) => s + 1)} style={{
             padding: '8px 20px', borderRadius: 8, border: 'none',
-            background: '#1E7FFF', color: '#fff', cursor: 'pointer',
+            background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
             fontSize: 14, fontFamily: 'inherit', fontWeight: 600,
           }}>{isLast ? t.startGame : t.next}</button>
         </div>

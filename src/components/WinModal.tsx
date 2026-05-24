@@ -27,7 +27,7 @@ export function WinModal({ winner, score, t, onRestart, onClose }: WinModalProps
         <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 28 }}>{score} pt</p>
         <button className="btn-primary" onClick={onRestart} style={{
           width: '100%', padding: '12px 0', borderRadius: 10, border: 'none',
-          background: '#1E7FFF', color: '#fff', cursor: 'pointer',
+          background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
           fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
         }}>{t.restart}</button>
       </div>

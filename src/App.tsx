@@ -292,7 +292,7 @@ export default function App() {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   const scores_row = (
-    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
       {Array.from({ length: np }, (_, i) => {
         if (i === 0) return null // player 1 shown inside hand_panel
         const isActive = turn === i && !gameOver

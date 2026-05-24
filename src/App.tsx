@@ -3,6 +3,7 @@ import { I18N, type Lang } from './i18n'
 import { makeGame } from './game/logic'
 import { type Difficulty } from './game/ai'
 import { saveGame, loadSave, clearSave, saveSettings, loadSettings, type Theme } from './game/storage'
+import { recordGameResult } from './game/stats'
 import { playSound } from './game/sounds'
 import { PLAYER_COLORS, PLAYER_COLORS_DARK } from './game/constants'
 import type { HistoryState } from './game/types'
@@ -114,6 +115,7 @@ export default function App() {
       const wi = scores.indexOf(Math.max(...scores))
       setWinner({ name: PL[wi], score: scores[wi] })
       playSound('win', mutedRef.current)
+      recordGameResult(scores[0], wi === 0, gs.log.length)
       setTimeout(() => setShowWin(true), 600)
     }
   }, [gameOver]) // eslint-disable-line react-hooks/exhaustive-deps

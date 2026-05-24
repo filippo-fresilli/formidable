@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
+import { loadStats } from '../game/stats'
 import { ModalShell } from './ModalShell'
 
 function ToggleGroup<T extends string | number>({
@@ -42,12 +43,79 @@ interface ParamsModalProps {
   onClose: () => void
 }
 
+// ── Stats view ────────────────────────────────────────────────────────────────
+
+function StatRow({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div style={{
+      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      padding: '9px 0', borderBottom: '1px solid var(--border-default)',
+    }}>
+      <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{label}</span>
+      <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</span>
+    </div>
+  )
+}
+
+function StatsView({ t, onBack, onClose }: { t: I18nDict; onBack: () => void; onClose: () => void }) {
+  const s = loadStats()
+  const hasData = s.gamesPlayed > 0
+  const avgScore = hasData ? (s.totalScore / s.gamesPlayed).toFixed(1) : '—'
+  const avgTurns = hasData ? Math.round(s.totalTurns / s.gamesPlayed) : '—'
+  const winRate  = hasData ? `${Math.round((s.gamesWon / s.gamesPlayed) * 100)}%` : '—'
+
+  return (
+    <ModalShell maxWidth={360} padding={28} onClose={undefined}>
+      {/* Custom header: ← | title | ✕ */}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
+        <button onClick={onBack} style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          fontSize: 20, color: 'var(--text-faint)', padding: '4px 8px 4px 0', lineHeight: 1,
+        }}>←</button>
+        <h2 style={{ flex: 1, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
+          {t.statsTitle}
+        </h2>
+        <button onClick={onClose} style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          fontSize: 20, color: 'var(--text-faint)', padding: 4, lineHeight: 1,
+        }}>✕</button>
+      </div>
+
+      {hasData ? (
+        <div>
+          <StatRow label={t.statsGamesPlayed} value={s.gamesPlayed} />
+          <StatRow label={t.statsGamesWon} value={`${s.gamesWon} (${winRate})`} />
+          <StatRow label={t.statsBestScore} value={s.bestScore} />
+          <StatRow label={t.statsAvgScore} value={avgScore} />
+          <StatRow label={t.statsAvgTurns} value={avgTurns} />
+          <StatRow
+            label={t.statsFastestWin}
+            value={s.fastestWin !== null ? s.fastestWin : '—'}
+          />
+        </div>
+      ) : (
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', margin: '32px 0' }}>
+          {t.statsNoData}
+        </p>
+      )}
+    </ModalShell>
+  )
+}
+
+// ── Main modal ────────────────────────────────────────────────────────────────
+
 export function ParamsModal({
   t, lang, setLang, numPlayers, onSetPlayers,
   difficulty, setDifficulty, playerName, setPlayerName,
   muted, setMuted, theme, setTheme,
   isFirstOpen = false, onStart, onRestart, onClose,
 }: ParamsModalProps) {
+  const [view, setView] = useState<'settings' | 'stats'>('settings')
+
+  if (view === 'stats') {
+    return <StatsView t={t} onBack={() => setView('settings')} onClose={onClose} />
+  }
+
   const sec = (label: string, child: React.ReactNode) => (
     <div style={{ marginBottom: 18 }}>
       <div style={{
@@ -119,11 +187,18 @@ export function ParamsModal({
           fontSize: 15, fontWeight: 700, fontFamily: 'inherit',
         }}>{t.letsGo}</button>
       ) : (
-        <button className="btn-primary" onClick={() => { onRestart(); onClose() }} style={{
-          width: '100%', padding: 10, borderRadius: 10, border: 'none',
-          background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
-          fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-        }}>{t.restart}</button>
+        <>
+          <button className="btn-primary" onClick={() => { onRestart(); onClose() }} style={{
+            width: '100%', padding: 10, borderRadius: 10, border: 'none',
+            background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
+            fontSize: 14, fontWeight: 700, fontFamily: 'inherit', marginBottom: 10,
+          }}>{t.restart}</button>
+          <button onClick={() => setView('stats')} style={{
+            width: '100%', padding: 9, borderRadius: 10, cursor: 'pointer',
+            border: '1.5px solid var(--border-default)', background: 'none',
+            color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+          }}>{t.statsLabel}</button>
+        </>
       )}
       <p style={{
         margin: '16px 0 0', fontSize: 11, color: 'var(--text-faint)',

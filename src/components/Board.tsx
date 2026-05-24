@@ -73,6 +73,10 @@ export function Board({
           <filter id="card-shadow" x="-30%" y="-30%" width="160%" height="160%">
             <feGaussianBlur stdDeviation="3" />
           </filter>
+          {/* Deeper shadow for stacked (conquered) cards */}
+          <filter id="card-shadow-deep" x="-40%" y="-40%" width="180%" height="180%">
+            <feGaussianBlur stdDeviation="5" />
+          </filter>
         </defs>
         {/* Pass 1: shadows only — drawn first so cards cover them */}
         {ALL_CELLS.map(({ q, r }) => {
@@ -124,6 +128,13 @@ export function Board({
 
           return (
             <g key={k} onClick={onClick ?? undefined} style={{ cursor: onClick ? 'pointer' : 'default' }}>
+              {/* Stacked-card effect: offset layer peeking below + stronger shadow */}
+              {isConq && card && (
+                <polygon
+                  points={hexPoints(x, y + hr * 0.12, hr - 1)}
+                  style={{ fill: COLOR_HEX[card.oc], opacity: 0.45, stroke: 'none', filter: 'url(#card-shadow-deep)' }}
+                />
+              )}
               <polygon points={hexPoints(x, y, hr - 0.5)} style={{ fill, stroke, strokeWidth: sw }} />
               {card && (
                 <>

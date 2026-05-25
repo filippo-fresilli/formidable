@@ -111,7 +111,7 @@ export function doWithdraw(
   g.scores[idx] += pts
   delete g.meeples[key]
   g.tokens[idx]++
-  if (isConq) {
+  if (isConq && pts > 0) {
     const burned = getBurnCells(bq, br, g.board, g.meeples)
     for (const bk of burned) {
       if (g.board[bk]) { g.discard.push(g.board[bk]); delete g.board[bk]; delete g.conquered[bk] }

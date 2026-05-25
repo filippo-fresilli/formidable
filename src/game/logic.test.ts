@@ -182,6 +182,16 @@ describe('doWithdraw', () => {
     return g
   }
 
+  function makeConqNoPointsState(): GameState {
+    const g = makeGame(2)
+    // Carta isolata (nessuna linea di 4) → 0 punti al ritiro
+    g.board['0,0'] = { oc: 'B', os: 'C', ic: 'R', is: 'Q' }
+    g.meeples['0,0'] = 0
+    g.conquered['0,0'] = true
+    g.tokens[0] = 1
+    return g
+  }
+
   it('aggiunge i punti al punteggio del giocatore', () => {
     const g = makeTestState()
     const { pts } = doWithdraw(g, 0, '0,0', t)
@@ -212,6 +222,13 @@ describe('doWithdraw', () => {
     g.scores[0] = 46  // 46 + 4 = 50 → gameOver
     doWithdraw(g, 0, '0,0', t)
     expect(g.gameOver).toBe(true)
+  })
+
+  it('carta conquistata senza punti: nessuna carta viene bruciata', () => {
+    const g = makeConqNoPointsState()
+    const boardKeysBefore = Object.keys(g.board).length
+    doWithdraw(g, 0, '0,0', t)
+    expect(Object.keys(g.board).length).toBe(boardKeysBefore)
   })
 })
 

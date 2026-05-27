@@ -25,7 +25,9 @@ function potentialBonus(q: number, r: number, brd: Board): number {
     const line = buildLine(q, r, dq, dr, brd)
     if (line.length < 2) continue
     const idx = line.findIndex(p => p.q === q && p.r === r)
+    if (idx === -1) continue
     const cards = line.map(p => brd[ck(p.q, p.r)])
+    if (cards.some(c => !c)) continue
     for (const attr of ATTRS) {
       const n = subLineLen(cards, idx, attr)
       if (n === 3) bonus += 3   // one card away from scoring
@@ -107,7 +109,7 @@ function runMediumTurn(g: GameState, idx: number, t: I18nDict): string {
       }
     }
   }
-  if (!mv) {
+  if (!mv && g.hands[idx].length > 0) {
     const empties = [...cands].filter(k => !g.board[k])
     if (empties.length) { const [cq, cr] = parseKey(empties[0]); mv = { q: cq, r: cr, ci: 0, conq: false } }
   }
@@ -180,7 +182,7 @@ function runHardTurn(g: GameState, idx: number, t: I18nDict): string {
       }
     }
   }
-  if (!mv) {
+  if (!mv && g.hands[idx].length > 0) {
     const empties = [...cands].filter(k => !g.board[k])
     if (empties.length) { const [cq, cr] = parseKey(empties[0]); mv = { q: cq, r: cr, ci: 0, conq: false } }
   }

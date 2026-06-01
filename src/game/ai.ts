@@ -214,16 +214,11 @@ function runHardTurn(g: GameState, idx: number, t: I18nDict): string {
     if (tot > bestWithdrawPts) { bestWithdrawPts = tot; bestWithdrawKey = k }
   }
 
-  // Score the best cell to place a new meeple (highest potential, not just placed card)
+  // A meeple may only be placed on the tile just played this turn — never on an
+  // existing tile. Evaluate only that cell's potential.
   let bestPlaceKey: string | null = null
-  let bestPlacePotential = -1
-  if (g.tokens[idx] > 0) {
-    for (const k of Object.keys(g.board)) {
-      if (g.meeples[k] !== undefined) continue
-      const [cq, cr] = parseKey(k)
-      const pot = potentialBonus(cq, cr, g.board) + calcScore(cq, cr, g.board, t).tot
-      if (pot > bestPlacePotential) { bestPlacePotential = pot; bestPlaceKey = k }
-    }
+  if (g.tokens[idx] > 0 && placedKey && g.meeples[placedKey] === undefined) {
+    bestPlaceKey = placedKey
   }
 
   // Decision logic:

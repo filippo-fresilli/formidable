@@ -5,8 +5,9 @@ import {
   calcScore, doWithdraw, makeGame, cloneGame,
   replenishHand, getBurnCells,
 } from './logic'
+import { runCpuTurn } from './ai'
 import { I18N } from '../i18n'
-import type { Board, GameState } from './types'
+import type { Board, Card, GameState } from './types'
 
 const t = I18N['it']
 
@@ -305,5 +306,75 @@ describe('replenishHand', () => {
     g.hands[0] = []
     replenishHand(g, 0)
     expect(g.hands[0]).toHaveLength(0)
+  })
+})
+
+describe('regola pedina: solo sulla tessera appena giocata (bot hard)', () => {
+  // Caso mirato che riproduce il bug: una linea preesistente di 3 tessere
+  // condivide il colore esterno R → la sua cella centrale ha alto "potenziale".
+  // Il vecchio codice del bot hard ci posava la pedina, violando la regola.
+  it('non posiziona la pedina su una tessera preesistente ad alto potenziale', () => {
+    const board: Board = {
+      '-1,0': { os: 'T', oc: 'B', is: 'T', ic: 'B' }, // tappo: spezza la run di R
+      '0,0':  { os: 'T', oc: 'R', is: 'T', ic: 'B' }, // ┐
+      '1,0':  { os: 'Q', oc: 'R', is: 'Q', ic: 'G' }, // ├ run di 3 con oc=R (potenziale +3)
+      '2,0':  { os: 'C', oc: 'R', is: 'C', ic: 'B' }, // ┘
+      '3,0':  { os: 'C', oc: 'B', is: 'C', ic: 'G' }, // tappo: spezza la run di R
+      '0,3':  { os: 'T', oc: 'B', is: 'T', ic: 'G' }, // tessera isolata lontana
+    }
+    // Carta in mano: condivide <2 tratti con OGNI tessera → nessuna conquista possibile,
+    // quindi il bot la posa su una cella vuota.
+    const hand: Card = { os: 'Q', oc: 'G', is: 'C', ic: 'R' }
+    const g: GameState = {
+      numPlayers: 2, deck: [], discard: [],
+      scores: [0, 0], hands: [[], [hand]], tokens: [2, 2],
+      board, conquered: {}, meeples: {},
+      turn: 1, phase: 'place', selIdx: -1, log: [], placedPos: null, gameOver: false,
+    }
+    const idx = 1
+    const boardKeysBefore = new Set(Object.keys(g.board))
+
+    runCpuTurn(g, idx, t, 'hard')
+
+    // Le tessere preesistenti della run NON devono avere la pedina del bot
+    for (const k of ['0,0', '1,0', '2,0']) expect(g.meeples[k]).toBeUndefined()
+
+    // Ogni pedina del bot deve stare su una cella che PRIMA era vuota (la tessera giocata)
+    for (const [k, owner] of Object.entries(g.meeples)) {
+      if (owner !== idx) continue
+      expect(boardKeysBefore.has(k)).toBe(false)
+    }
+
+    // Il bot ha comunque posato esattamente una pedina in questo turno
+    expect(Object.values(g.meeples).filter(v => v === idx)).toHaveLength(1)
+  })
+
+  // Test di proprietà: simula partite complete e verifica l'invariante a ogni turno.
+  it('su 40 partite simulate ogni pedina nuova finisce solo sulla tessera giocata', () => {
+    for (let game = 0; game < 40; game++) {
+      const g = makeGame(3)
+      for (let step = 0; step < 80 && !g.gameOver; step++) {
+        const idx = g.turn
+        const beforeCards: Board = { ...g.board }
+        const beforeMeeples = { ...g.meeples }
+
+        runCpuTurn(g, idx, t, 'hard')
+
+        // Tessera/e "giocate" in questo turno: celle nuove o la cui carta è cambiata (conquista)
+        const playedKeys = new Set<string>()
+        for (const k of Object.keys(g.board)) {
+          if (beforeCards[k] === undefined || beforeCards[k] !== g.board[k]) playedKeys.add(k)
+        }
+
+        for (const [k, owner] of Object.entries(g.meeples)) {
+          if (owner !== idx) continue
+          if (beforeMeeples[k] === idx) continue // pedina già presente da un turno precedente
+          // una pedina nuova del bot DEVE stare sulla tessera appena giocata
+          expect(playedKeys.has(k)).toBe(true)
+        }
+
+        g.turn = (idx + 1) % g.numPlayers
+      }
+    }
   })
 })

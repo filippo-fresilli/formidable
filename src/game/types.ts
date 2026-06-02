@@ -44,6 +44,7 @@ export interface HistoryState {
 
 export type HistoryAction =
   | { type: 'COMMIT'; game: GameState }
+  | { type: 'REPLACE'; game: GameState }
   | { type: 'UNDO' }
   | { type: 'REDO' }
   | { type: 'RESET'; game: GameState }

@@ -6,11 +6,17 @@ import { clearSave } from './storage'
 import { playSound } from './sounds'
 import type { GameState, HistoryState, HistoryAction } from './types'
 
+// Delay between consecutive bot turns so their moves are visible to the player.
+const CPU_STEP_MS = 500
+
 // ── History reducer ────────────────────────────────────────────────────────────
 
 function historyReducer(state: HistoryState, action: HistoryAction): HistoryState {
   switch (action.type) {
     case 'COMMIT': return { past: [...state.past, state.present], present: action.game, future: [] }
+    // Like COMMIT but does NOT push to history — used for intermediate bot turns
+    // so the whole CPU sequence collapses into a single undo step.
+    case 'REPLACE': return { past: state.past, present: action.game, future: [] }
     case 'UNDO':
       if (!state.past.length) return state
       return { past: state.past.slice(0, -1), present: state.past[state.past.length - 1], future: [state.present, ...state.future] }
@@ -65,23 +71,32 @@ export function useGame({
     setCpuBusy(true)
     const tLocal = I18N[langRef.current!]
     const diff = difficultyRef.current!
-    setTimeout(() => {
-      const g = cloneGame(baseGame)
-      let idx = g.turn
-      const entries: string[] = []
-      while (idx !== 0) {
-        const desc = runCpuTurn(g, idx, tLocal, diff)
-        entries.push(desc)
-        if (g.gameOver) { g.turn = idx; break }
-        idx = (idx + 1) % g.numPlayers
+
+    // Run ONE bot's full turn, make it visible, then pause ~half a second before
+    // the next bot — so the player can follow who is playing and what they do.
+    const step = (prev: GameState) => {
+      const g = cloneGame(prev)
+      const idx = g.turn
+      const desc = runCpuTurn(g, idx, tLocal, diff)
+      g.log = [...g.log, desc]
+      if (g.gameOver) {
         g.turn = idx
+      } else {
+        const next = (idx + 1) % g.numPlayers
+        g.turn = next
+        if (next === 0) { g.phase = 'place'; g.placedPos = null; g.selIdx = -1 }
       }
-      if (!g.gameOver) { g.turn = 0; g.phase = 'place'; g.placedPos = null; g.selIdx = -1 }
-      g.log = [...g.log, ...entries]
-      dispatch({ type: 'COMMIT', game: g })
-      cpuRef.current = false
-      setCpuBusy(false)
-    }, 800)
+      // REPLACE (not COMMIT): the whole bot sequence stays a single undo step.
+      dispatch({ type: 'REPLACE', game: g })
+      if (!g.gameOver && g.turn !== 0) {
+        setTimeout(() => step(g), CPU_STEP_MS)
+      } else {
+        cpuRef.current = false
+        setCpuBusy(false)
+      }
+    }
+
+    setTimeout(() => step(baseGame), CPU_STEP_MS)
   }, [langRef, difficultyRef])
 
   // Run CPU on first mount if a resumed game starts on a bot turn
@@ -182,7 +197,7 @@ export function useGame({
     const newGame = makeGame(n)
     dispatch({ type: 'RESET', game: newGame })
     onRestart(n)
-    if (newGame.turn !== 0) setTimeout(() => executeCpu(newGame), 800)
+    if (newGame.turn !== 0) executeCpu(newGame)
   }
 
   function undo() { dispatch({ type: 'UNDO' }) }

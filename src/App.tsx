@@ -4,6 +4,7 @@ import { makeGame } from './game/logic'
 import { type Difficulty } from './game/ai'
 import { saveGame, loadSave, clearSave, saveSettings, loadSettings, type Theme } from './game/storage'
 import { recordGameResult } from './game/stats'
+import { trackGameStarted, trackGameCompleted, trackPwaInstalled } from './game/analytics'
 import { playSound } from './game/sounds'
 import { PLAYER_COLORS, PLAYER_COLORS_DARK } from './game/constants'
 import type { HistoryState } from './game/types'
@@ -100,9 +101,21 @@ export default function App() {
   const PL           = [playerName.trim() || t.player1, t.bot1, t.bot2, t.bot3]
   const playerColors = theme === 'dark' ? PLAYER_COLORS_DARK : PLAYER_COLORS
 
-  function restart(np2?: number) { gameRestart(np2) }
+  function restart(np2?: number) {
+    trackGameStarted({ difficulty, players: np2 ?? numPlayers, lang })
+    gameRestart(np2)
+  }
 
   // ── Effects ───────────────────────────────────────────────────────────────
+
+  // Analytics: first game of the session (a resumed game is not a "start") + PWA install
+  useEffect(() => {
+    if (!isResume) trackGameStarted({ difficulty, players: numPlayers, lang })
+    const onInstalled = () => trackPwaInstalled()
+    window.addEventListener('appinstalled', onInstalled)
+    return () => window.removeEventListener('appinstalled', onInstalled)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (timerActive && !gameOver) timerRef.current = setInterval(() => setElapsed((e) => e + 1), 1000)
@@ -116,6 +129,10 @@ export default function App() {
       setWinner({ name: PL[wi], score: scores[wi] })
       playSound('win', mutedRef.current)
       recordGameResult(scores[0], wi === 0, gs.log.length)
+      trackGameCompleted({
+        won: wi === 0, score: scores[0], turns: gs.log.length,
+        difficulty: difficultyRef.current, players: numPlayersRef.current,
+      })
       setTimeout(() => setShowWin(true), 600)
     }
   }, [gameOver]) // eslint-disable-line react-hooks/exhaustive-deps

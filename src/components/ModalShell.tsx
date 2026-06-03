@@ -11,6 +11,8 @@ interface ModalShellProps {
   hideCloseButton?: boolean
   /** Position of the ✕ button (default 'right') */
   closeAlign?: 'left' | 'right'
+  /** Extra class on the inner card (e.g. for entrance animations) */
+  cardClassName?: string
 }
 
 /**
@@ -19,6 +21,7 @@ interface ModalShellProps {
  */
 export function ModalShell({
   children, maxWidth = 400, padding = 32, textAlign, onClose, hideCloseButton = false, closeAlign = 'right',
+  cardClassName,
 }: ModalShellProps) {
   return (
     <div
@@ -30,6 +33,7 @@ export function ModalShell({
     >
       {/* Stop propagation so clicks inside the card don't close the modal */}
       <div
+        className={cardClassName}
         onClick={(e) => e.stopPropagation()}
         style={{
           background: 'var(--bg-panel)', borderRadius: 16, padding, maxWidth, width: '100%',

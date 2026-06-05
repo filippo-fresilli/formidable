@@ -1,3 +1,4 @@
+import { Settings, HelpCircle, Clock, Play, Pause, Save } from 'lucide-react'
 import { panel, navBtn } from '../ui/styles'
 import type { I18nDict } from '../i18n'
 
@@ -26,11 +27,11 @@ export function TopBar({
         Formidable
       </span>
       <span style={{
-        fontSize: 'var(--font-sm)', color: '#3DC35A', userSelect: 'none',
+        color: '#3DC35A', userSelect: 'none', display: 'flex', alignItems: 'center',
         opacity: justSaved ? 1 : 0,
         transition: 'opacity 0.6s',
         pointerEvents: 'none',
-      }}>💾</span>
+      }}><Save size={15} /></span>
 
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6 }}>
         {isDesktop && (
@@ -41,25 +42,25 @@ export function TopBar({
           }}>
             <span style={{
               fontSize: 'var(--font-md)', fontWeight: 700,
-              fontVariantNumeric: 'tabular-nums',
+              fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', gap: 5,
               color: gameOver ? 'var(--timer-color-over)' : 'var(--timer-color)',
             }}>
-              ⏱ {formatTime(elapsed)}
+              <Clock size={15} /> {formatTime(elapsed)}
             </span>
-            <button className="btn-icon" onClick={onToggleTimer} style={{
+            <button className="btn-icon" onClick={onToggleTimer} aria-label={timerActive ? 'Pause' : 'Play'} style={{
               background: 'none', border: 'none', cursor: 'pointer',
-              fontSize: 'var(--font-md)', padding: '0 4px',
+              padding: '0 4px',
               color: 'var(--text-secondary)', height: 44, display: 'flex', alignItems: 'center',
             }}>
-              {timerActive ? '⏸' : '▶'}
+              {timerActive ? <Pause size={16} /> : <Play size={16} />}
             </button>
           </div>
         )}
-        <button className="btn-nav" onClick={onHelp} style={navBtn(true)}>
-          {t.help}
+        <button className="btn-nav" onClick={onHelp} aria-label={t.params} style={navBtn(true)}>
+          <HelpCircle size={18} />
         </button>
-        <button className="btn-nav" onClick={onOpenSettings} style={{ ...navBtn(true), gap: 4 }}>
-          ⚙️{isDesktop && <span> {t.params.replace('⚙️ ', '')}</span>}
+        <button className="btn-nav" onClick={onOpenSettings} aria-label={t.params} style={{ ...navBtn(true), gap: 6 }}>
+          <Settings size={18} />{isDesktop && <span>{t.params}</span>}
         </button>
       </div>
     </div>

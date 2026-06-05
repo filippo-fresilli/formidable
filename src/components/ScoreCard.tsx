@@ -1,4 +1,27 @@
+import { useEffect, useRef, useState } from 'react'
 import { MeepleInline } from './MeepleIcon'
+
+// Smoothly tween a displayed number toward `value` (easeOutCubic).
+function useCountUp(value: number, duration = 550): number {
+  const [display, setDisplay] = useState(value)
+  const fromRef = useRef(value)
+  useEffect(() => {
+    const from = fromRef.current
+    if (from === value) return
+    const start = performance.now()
+    let raf = 0
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / duration)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setDisplay(Math.round(from + (value - from) * eased))
+      if (p < 1) raf = requestAnimationFrame(tick)
+      else fromRef.current = value
+    }
+    raf = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(raf)
+  }, [value, duration])
+  return display
+}
 
 interface ScoreCardProps {
   name: string
@@ -12,6 +35,7 @@ interface ScoreCardProps {
 }
 
 export function ScoreCard({ name, color, meepleTotal, meeplesFilled, score, isActive }: ScoreCardProps) {
+  const shownScore = useCountUp(score)
   return (
     <div style={{
       background: 'var(--bg-panel)', borderRadius: 'var(--radius-md)',
@@ -39,7 +63,7 @@ export function ScoreCard({ name, color, meepleTotal, meeplesFilled, score, isAc
         fontSize: 'var(--font-3xl)', fontWeight: 800,
         color, lineHeight: 1, flexShrink: 0,
       }}>
-        {score}<span style={{ fontSize: 'var(--font-xs)', fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
+        {shownScore}<span style={{ fontSize: 'var(--font-xs)', fontWeight: 400, color: 'var(--text-muted)' }}>/50</span>
       </div>
     </div>
   )

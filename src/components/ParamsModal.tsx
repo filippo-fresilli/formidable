@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Volume2, VolumeX, Sun, Moon, BarChart3, RotateCcw } from 'lucide-react'
 import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
@@ -242,14 +243,16 @@ export function ParamsModal({
           background: muted ? 'var(--bg-panel-alt)' : 'var(--color-primary-subtle)',
           color: muted ? 'var(--text-secondary)' : 'var(--color-primary)',
           fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-        }}>{muted ? t.soundOff : t.soundOn}</button>
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        }}>{muted ? <VolumeX size={16} /> : <Volume2 size={16} />}{muted ? t.soundOff : t.soundOn}</button>
         <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} style={{
           flex: 1, padding: '10px 0', borderRadius: 10, cursor: 'pointer',
           border: '2px solid var(--border-default)',
           background: 'var(--bg-panel-alt)',
           color: 'var(--text-secondary)',
           fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-        }}>{theme === 'dark' ? t.themeLight : t.themeDark}</button>
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        }}>{theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}{theme === 'dark' ? t.themeLight : t.themeDark}</button>
       </div>
 
       {/* Primary action: changes based on context */}
@@ -264,7 +267,8 @@ export function ParamsModal({
           width: '100%', padding: 10, borderRadius: 10, border: 'none',
           background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
           fontSize: 14, fontWeight: 700, fontFamily: 'inherit', marginBottom: 10,
-        }}>{t.restart}</button>
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+        }}><RotateCcw size={16} />{t.restart}</button>
       )}
 
       {/* Tertiary stats button — always visible */}
@@ -272,7 +276,8 @@ export function ParamsModal({
         width: '100%', padding: 9, borderRadius: 10, cursor: 'pointer',
         border: '1.5px solid var(--border-default)', background: 'none',
         color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
-      }}>{t.statsLabel}</button>
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      }}><BarChart3 size={15} />{t.statsLabel}</button>
 
       <p style={{
         margin: '16px 0 0', fontSize: 11, color: 'var(--text-faint)',

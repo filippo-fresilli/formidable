@@ -125,10 +125,12 @@ export function Board({
           if (hl === 'place') { fill = 'var(--place-fill)'; stroke = 'var(--place-stroke)'; sw = 2 }
           if (hl === 'conquer') { fill = 'var(--conquer-fill)'; stroke = 'var(--conquer-stroke)'; sw = 2 }
           if (hl === 'withdraw') { fill = 'var(--withdraw-fill)'; stroke = 'var(--withdraw-stroke)'; sw = 2.5 }
+          const justPlaced = !!card && !!placedPos && placedPos.q === q && placedPos.r === r
           if (placedPos && placedPos.q === q && placedPos.r === r) { stroke = 'var(--place-stroke)'; sw = 2.5 }
 
           return (
-            <g key={k} onClick={onClick ?? undefined} style={{ cursor: onClick ? 'pointer' : 'default' }}>
+            <g key={k} onClick={onClick ?? undefined} style={{ cursor: onClick ? 'pointer' : 'default' }}
+              className={justPlaced ? 'card-pop' : undefined}>
               <polygon points={hexPoints(x, y, hr - 0.5)} style={{ fill, stroke, strokeWidth: sw }} />
               {card && (
                 <>

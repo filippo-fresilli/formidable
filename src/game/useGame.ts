@@ -4,7 +4,8 @@ import { makeGame, cloneGame, replenishHand, doWithdraw, ck } from './logic'
 import { runCpuTurn, type Difficulty } from './ai'
 import { clearSave } from './storage'
 import { playSound } from './sounds'
-import type { GameState, HistoryState, HistoryAction } from './types'
+import type { GameState, HistoryState, HistoryAction, Flash } from './types'
+import type { WithdrawResult } from './logic'
 
 // Delay between consecutive bot turns so their moves are visible to the player.
 const CPU_STEP_MS = 500
@@ -59,6 +60,7 @@ export function useGame({
 }: UseGameOptions) {
   const [hist, dispatch] = useReducer(historyReducer, initialState)
   const [cpuBusy, setCpuBusy] = useState(false)
+  const [flash, setFlash] = useState<Flash | null>(null)
   const cpuRef = useRef(false)
   const gs = hist.present
 
@@ -174,12 +176,20 @@ export function useGame({
   function playerWithdraw(q: number, r: number) {
     const t = I18N[langRef.current!]
     playSound('withdraw', mutedRef.current!)
+    let res: WithdrawResult | null = null
     playerAction((g) => {
-      const { pts, details, isConq } = doWithdraw(g, 0, ck(q, r), t)
-      const pd = pts > 0 ? details.join(', ') : '0 pt'
-      g.lastAction = `G1 ↩ (${q},${r})${isConq ? ' 🔥' : ''} +${pts}pt (${pd}) tot ${g.scores[0]}`
+      res = doWithdraw(g, 0, ck(q, r), t)
+      const pd = res.pts > 0 ? res.details.join(', ') : '0 pt'
+      g.lastAction = `G1 ↩ (${q},${r})${res.isConq ? ' 🔥' : ''} +${res.pts}pt (${pd}) tot ${g.scores[0]}`
       if (!g.gameOver) { replenishHand(g, 0); g.phase = 'draw'; g.turn = 1 }
     })
+    // Transient score/burn animation (cleared after it plays)
+    const r2 = res as WithdrawResult | null
+    if (r2 && (r2.pts > 0 || r2.burnCells.length > 0)) {
+      const f: Flash = { id: Date.now(), pts: r2.pts, key: ck(q, r), scoreCells: r2.scoreCells, burnCells: r2.burnCells }
+      setFlash(f)
+      setTimeout(() => setFlash((cur) => (cur && cur.id === f.id ? null : cur)), 1000)
+    }
   }
 
   function selectCard(i: number) {
@@ -194,6 +204,7 @@ export function useGame({
     clearSave()
     cpuRef.current = false
     setCpuBusy(false)
+    setFlash(null)
     const newGame = makeGame(n)
     dispatch({ type: 'RESET', game: newGame })
     onRestart(n)
@@ -205,6 +216,7 @@ export function useGame({
 
   return {
     gs,
+    flash,
     busy: cpuBusy || cpuRef.current,
     cpuBusy,
     canBack: hist.past.length > 0,

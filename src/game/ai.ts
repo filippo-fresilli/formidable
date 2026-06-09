@@ -1,5 +1,5 @@
-import { ck, parseKey, nbrs, sharedTraits, calcScore, doWithdraw, replenishHand, buildLine, subLineLen } from './logic'
-import { ATTRS, LDIRS } from './constants'
+import { ck, parseKey, nbrs, sharedTraits, calcScore, scoreTotal, doWithdraw, replenishHand, buildLine, subLineLen } from './logic'
+import { ATTRS, LDIRS, WIN_SCORE } from './constants'
 import type { GameState, Board } from './types'
 import type { I18nDict } from '../i18n'
 
@@ -47,6 +47,20 @@ function opponentBestScore(g: GameState, idx: number, t: I18nDict): number {
     if (tot > best) best = tot
   }
   return best
+}
+
+// Net change a board move causes to opponents' standing meeple scores.
+// Positive = the move HELPED opponents (assist); negative = it HURT them (denial,
+// e.g. a conquest whose new card breaks an opponent's trait run). Used by the hard
+// bot to avoid building shared lines for the player and to reward breaking them.
+export function opponentScoreDelta(g: GameState, idx: number, before: Board, after: Board): number {
+  let delta = 0
+  for (const [k, owner] of Object.entries(g.meeples)) {
+    if (owner === idx) continue
+    const [q, r] = parseKey(k)
+    delta += scoreTotal(q, r, after) - scoreTotal(q, r, before)
+  }
+  return delta
 }
 
 // ── Easy bot: mostly random ───────────────────────────────────────────────────
@@ -159,8 +173,8 @@ function runHardTurn(g: GameState, idx: number, t: I18nDict): string {
 
   const cands = getCandidates(g)
 
-  // Evaluate each placement with: immediate score + potential bonus
-  let bestEval = -1
+  // Evaluate each placement with: immediate score + potential bonus − opponent assist
+  let bestEval = -Infinity
   let mv: { q: number; r: number; ci: number; conq: boolean } | null = null
 
   for (let ci = 0; ci < g.hands[idx].length; ci++) {
@@ -171,13 +185,16 @@ function runHardTurn(g: GameState, idx: number, t: I18nDict): string {
       const boardAfter = { ...g.board, [cki]: card }
       const immediate = calcScore(cq, cr, boardAfter, t).tot
       const potential = potentialBonus(cq, cr, boardAfter)
+      // Subtract points this move grants opponents (anti-assist); a negative delta
+      // — e.g. a conquest that breaks an opponent's run — becomes a denial bonus.
+      const oppDelta = opponentScoreDelta(g, idx, g.board, boardAfter)
 
       if (ex && g.meeples[cki] === undefined && sharedTraits(card, ex) >= 2 && g.tokens[idx] > 0) {
         // Conquest: value immediate score heavily, conquest is strategic
-        const eval_ = immediate * 2 + potential
+        const eval_ = immediate * 2 + potential - oppDelta
         if (eval_ > bestEval) { bestEval = eval_; mv = { q: cq, r: cr, ci, conq: true } }
       } else if (!ex) {
-        const eval_ = immediate + potential
+        const eval_ = immediate + potential - oppDelta
         if (eval_ > bestEval) { bestEval = eval_; mv = { q: cq, r: cr, ci, conq: false } }
       }
     }
@@ -228,11 +245,15 @@ function runHardTurn(g: GameState, idx: number, t: I18nDict): string {
   // 4. If out of tokens, must withdraw
   const opponentThreat = opponentBestScore(g, idx, t)
   const shouldWithdrawUrgently = opponentThreat >= 12
+  // Endgame push: take the win if this withdraw reaches 50, and when already close
+  // to 50 cash in any positive score to close the game out.
+  const wouldWin = bestWithdrawKey !== null && bestWithdrawPts > 0 && g.scores[idx] + bestWithdrawPts >= WIN_SCORE
+  const nearWin = g.scores[idx] >= WIN_SCORE - 12
 
   if (g.tokens[idx] === 0 && bestWithdrawKey !== null) {
     const { pts, details } = doWithdraw(g, idx, bestWithdrawKey, t)
     desc += ` · ↩ +${pts}pt${details.length ? ` (${details.join(', ')})` : ''}`
-  } else if (bestWithdrawPts >= 8 || shouldWithdrawUrgently) {
+  } else if (wouldWin || bestWithdrawPts >= 8 || shouldWithdrawUrgently || (nearWin && bestWithdrawPts > 0)) {
     if (bestWithdrawKey !== null) {
       const { pts, details } = doWithdraw(g, idx, bestWithdrawKey, t)
       desc += ` · ↩ +${pts}pt${details.length ? ` (${details.join(', ')})` : ''}`

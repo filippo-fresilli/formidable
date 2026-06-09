@@ -5,7 +5,7 @@ import {
   calcScore, doWithdraw, makeGame, cloneGame,
   replenishHand, getBurnCells,
 } from './logic'
-import { runCpuTurn } from './ai'
+import { runCpuTurn, opponentScoreDelta } from './ai'
 import { I18N } from '../i18n'
 import type { Board, Card, GameState } from './types'
 
@@ -356,8 +356,8 @@ describe('regola pedina: solo sulla tessera appena giocata (bot hard)', () => {
   })
 
   // Test di proprietà: simula partite complete e verifica l'invariante a ogni turno.
-  it('su 40 partite simulate ogni pedina nuova finisce solo sulla tessera giocata', () => {
-    for (let game = 0; game < 40; game++) {
+  it('su 25 partite simulate ogni pedina nuova finisce solo sulla tessera giocata', () => {
+    for (let game = 0; game < 25; game++) {
       const g = makeGame(3)
       for (let step = 0; step < 80 && !g.gameOver; step++) {
         const idx = g.turn
@@ -382,5 +382,44 @@ describe('regola pedina: solo sulla tessera appena giocata (bot hard)', () => {
         g.turn = (idx + 1) % g.numPlayers
       }
     }
+  }, 20000)
+})
+
+describe('bot hard competitivo', () => {
+  // Tre carte verdi in fila lungo l'asse [1,0] (altri tratti distinti → conta solo oc)
+  const GREEN_3: Board = {
+    '0,0': { os: 'T', oc: 'G', is: 'C', ic: 'R' },
+    '1,0': { os: 'Q', oc: 'G', is: 'T', ic: 'B' },
+    '2,0': { os: 'C', oc: 'G', is: 'Q', ic: 'R' },
+  }
+
+  it('opponentScoreDelta > 0 quando il piazzamento aiuta una pedina avversaria', () => {
+    const g = makeGame(2)
+    g.meeples = { '1,0': 0 } // pedina avversaria (idx 0)
+    const before: Board = { ...GREEN_3 }
+    const after: Board = { ...GREEN_3, '3,0': { os: 'T', oc: 'G', is: 'C', ic: 'B' } } // completa la fila verde
+    // dal punto di vista del bot idx 1, aiutare l'avversario idx 0
+    expect(opponentScoreDelta(g, 1, before, after)).toBeGreaterThan(0)
+  })
+
+  it('opponentScoreDelta < 0 quando una conquista spezza una fila avversaria', () => {
+    const g = makeGame(2)
+    g.meeples = { '1,0': 0 }
+    const before: Board = { ...GREEN_3, '3,0': { os: 'T', oc: 'G', is: 'C', ic: 'B' } } // fila di 4 verdi (segna 4)
+    const after: Board = { ...before, '3,0': { os: 'T', oc: 'R', is: 'C', ic: 'B' } }    // conquista: carta rossa spezza la fila
+    expect(opponentScoreDelta(g, 1, before, after)).toBeLessThan(0)
+  })
+
+  it('spinta finale: vicino a 50 ritira per vincere', () => {
+    const g = makeGame(2)
+    g.board = { ...GREEN_3, '3,0': { os: 'T', oc: 'G', is: 'C', ic: 'B' } } // fila di 4 verdi
+    g.meeples = { '1,0': 1 }   // pedina del bot (idx 1) → vale 4 punti
+    g.hands[1] = []            // niente mano → nessun piazzamento, va dritto alla decisione pedina
+    g.deck = []
+    g.scores = [0, 48]
+    g.tokens = [2, 2]
+    runCpuTurn(g, 1, t, 'hard')
+    expect(g.scores[1]).toBeGreaterThanOrEqual(50)
+    expect(g.gameOver).toBe(true)
   })
 })

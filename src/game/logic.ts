@@ -147,7 +147,9 @@ export function doWithdraw(
   delete g.meeples[key]
   g.tokens[idx]++
   const burnCells: string[] = []
-  if (isConq && pts > 0) {
+  if (isConq) {
+    // Withdrawing from a conquered card always burns — at least the conquered
+    // card itself (with 0 points), plus scoring neighbours when points are made.
     const burned = getBurnCells(bq, br, g.board, g.meeples)
     for (const bk of burned) {
       if (g.board[bk]) { burnCells.push(bk); g.discard.push(g.board[bk]); delete g.board[bk]; delete g.conquered[bk] }

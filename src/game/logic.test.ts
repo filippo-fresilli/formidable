@@ -225,11 +225,17 @@ describe('doWithdraw', () => {
     expect(g.gameOver).toBe(true)
   })
 
-  it('carta conquistata senza punti: nessuna carta viene bruciata', () => {
+  it('carta conquistata senza punti: la carta viene comunque bruciata', () => {
     const g = makeConqNoPointsState()
-    const boardKeysBefore = Object.keys(g.board).length
-    doWithdraw(g, 0, '0,0', t)
-    expect(Object.keys(g.board).length).toBe(boardKeysBefore)
+    const { pts, burnCells } = doWithdraw(g, 0, '0,0', t)
+    expect(pts).toBe(0)
+    // Con 0 punti brucia almeno la carta conquistata stessa…
+    expect(burnCells).toContain('0,0')
+    // …che viene rimossa dalla plancia e dal set delle conquistate
+    expect(g.board['0,0']).toBeUndefined()
+    expect(g.conquered['0,0']).toBeUndefined()
+    // e finisce negli scarti
+    expect(g.discard.length).toBe(1)
   })
 })
 

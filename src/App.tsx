@@ -75,7 +75,7 @@ export default function App() {
 
   // ── Game logic ────────────────────────────────────────────────────────────
   const {
-    gs,
+    gs, flash,
     busy, canBack, canFwd,
     placeCard, placeMeeple, skipMeeple, playerWithdraw, selectCard,
     restart: gameRestart, undo, redo,
@@ -302,7 +302,7 @@ export default function App() {
               board={board} meeples={meeples} conquered={conquered}
               phase={phase} selIdx={selIdx} hands={hands} tokens={tokens}
               gameOver={gameOver || busy} placedPos={placedPos}
-              playerColors={playerColors}
+              playerColors={playerColors} flash={flash}
               onPlace={placeCard} onWithdraw={playerWithdraw}
             />
           </div>

@@ -80,8 +80,25 @@ export function calcScore(
   return { tot, details }
 }
 
-export function getBurnCells(q: number, r: number, brd: Board, meepAfter: Meeples): Set<string> {
-  const burn = new Set([ck(q, r)])
+// Total points a meeple at (q,r) would score on the current board (no i18n needed).
+export function scoreTotal(q: number, r: number, brd: Board): number {
+  if (!brd[ck(q, r)]) return 0
+  let tot = 0
+  for (const [dq, dr] of LDIRS) {
+    const line = buildLine(q, r, dq, dr, brd)
+    if (line.length < 4) continue
+    const idx = line.findIndex((p) => p.q === q && p.r === r)
+    const cards = line.map((p) => brd[ck(p.q, p.r)])
+    for (const attr of ATTRS) {
+      const n = subLineLen(cards, idx, attr)
+      if (n >= 4) tot += n
+    }
+  }
+  return tot
+}
+
+// Cells belonging to scoring lines through (q,r) — the cards that "light up".
+export function getScoreCells(q: number, r: number, brd: Board): Set<string> {
   const contrib = new Set<string>()
   for (const [dq, dr] of LDIRS) {
     const line = buildLine(q, r, dq, dr, brd)
@@ -93,6 +110,12 @@ export function getBurnCells(q: number, r: number, brd: Board, meepAfter: Meeple
         for (const p of line) contrib.add(ck(p.q, p.r))
     }
   }
+  return contrib
+}
+
+export function getBurnCells(q: number, r: number, brd: Board, meepAfter: Meeples): Set<string> {
+  const burn = new Set([ck(q, r)])
+  const contrib = getScoreCells(q, r, brd)
   for (const nb of nbrs(q, r)) {
     const k = ck(nb.q, nb.r)
     if (contrib.has(k) && meepAfter[k] === undefined) burn.add(k)
@@ -102,23 +125,36 @@ export function getBurnCells(q: number, r: number, brd: Board, meepAfter: Meeple
 
 // ── Meeple withdraw ───────────────────────────────────────────────────────────
 
+export interface WithdrawResult {
+  pts: number
+  details: string[]
+  isConq: boolean
+  /** Cells whose cards lit up because they scored (for the score animation). */
+  scoreCells: string[]
+  /** Cells whose cards were burned by this withdraw. */
+  burnCells: string[]
+}
+
 export function doWithdraw(
   g: GameState, idx: number, key: string, t: I18nDict
-): { pts: number; details: string[]; isConq: boolean } {
+): WithdrawResult {
   const [bq, br] = parseKey(key)
   const isConq = !!g.conquered[key]
   const { tot: pts, details } = calcScore(bq, br, g.board, t)
+  // Capture scoring cells BEFORE any burning removes cards from the board.
+  const scoreCells = pts > 0 ? [...getScoreCells(bq, br, g.board)] : []
   g.scores[idx] += pts
   delete g.meeples[key]
   g.tokens[idx]++
+  const burnCells: string[] = []
   if (isConq && pts > 0) {
     const burned = getBurnCells(bq, br, g.board, g.meeples)
     for (const bk of burned) {
-      if (g.board[bk]) { g.discard.push(g.board[bk]); delete g.board[bk]; delete g.conquered[bk] }
+      if (g.board[bk]) { burnCells.push(bk); g.discard.push(g.board[bk]); delete g.board[bk]; delete g.conquered[bk] }
     }
   }
   if (g.scores[idx] >= WIN_SCORE) g.gameOver = true
-  return { pts, details, isConq }
+  return { pts, details, isConq, scoreCells, burnCells }
 }
 
 // ── Game factory ──────────────────────────────────────────────────────────────

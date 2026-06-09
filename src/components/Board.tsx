@@ -1,9 +1,9 @@
 import { useRef, useState, useEffect } from 'react'
 import { COLOR_HEX, COLOR_STROKE, HRAD } from '../game/constants'
-import { ck, parseKey, nbrs, sharedTraits, hexPoints, ALL_CELLS } from '../game/logic'
+import { ck, parseKey, nbrs, sharedTraits, hexPoints, scoreTotal, ALL_CELLS } from '../game/logic'
 import { OuterShape, InnerShape } from './HexCard'
 import { MEEPLE_PATH } from './MeepleIcon'
-import type { Board as BoardType, Meeples, Conquered, Card, Pos } from '../game/types'
+import type { Board as BoardType, Meeples, Conquered, Card, Pos, Flash } from '../game/types'
 
 interface BoardProps {
   board: BoardType
@@ -16,6 +16,7 @@ interface BoardProps {
   gameOver: boolean
   placedPos: Pos | null
   playerColors: string[]
+  flash: Flash | null
   onPlace: (q: number, r: number, conquer: boolean) => void
   onWithdraw: (q: number, r: number) => void
 }
@@ -32,7 +33,7 @@ function MeepleIcon({ cx, cy, size, fill }: { cx: number; cy: number; size: numb
 
 export function Board({
   board, meeples, conquered, phase, selIdx, hands, tokens,
-  gameOver, placedPos, playerColors, onPlace, onWithdraw,
+  gameOver, placedPos, playerColors, flash, onPlace, onWithdraw,
 }: BoardProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState(400)
@@ -51,6 +52,32 @@ export function Board({
   const hr = Math.min(size / (2 * HRAD * 1.8 + 1), 60)
   const ox = size / 2, oy = size / 2
   const toPixel = (q: number, r: number) => ({ x: ox + hr * SQ3 * (q + r / 2), y: oy + hr * 1.5 * r })
+
+  // ── Score preview badges (cross-device: shown on every candidate cell, no hover) ──
+  const previewBadges: { x: number; y: number; pts: number }[] = []
+  if (!gameOver && phase === 'place' && selIdx >= 0 && hands[0]?.[selIdx]) {
+    const hc = hands[0][selIdx]
+    for (const { q, r } of ALL_CELLS) {
+      const k = ck(q, r)
+      const card = board[k]
+      const meep = meeples[k]
+      const adj = !card && Object.keys(board).some((k2) => {
+        const [q2, r2] = parseKey(k2)
+        return nbrs(q2, r2).some((n) => n.q === q && n.r === r)
+      })
+      const canConq = !!card && meep === undefined && tokens[0] > 0 && sharedTraits(hc, card) >= 2
+      if (adj || canConq) {
+        const pts = scoreTotal(q, r, { ...board, [k]: hc })
+        if (pts > 0) { const { x, y } = toPixel(q, r); previewBadges.push({ x, y, pts }) }
+      }
+    }
+  } else if (!gameOver && (phase === 'withdraw' || phase === 'meeple')) {
+    for (const { q, r } of ALL_CELLS) {
+      if (meeples[ck(q, r)] !== 0) continue
+      const pts = scoreTotal(q, r, board)
+      if (pts > 0) { const { x, y } = toPixel(q, r); previewBadges.push({ x, y, pts }) }
+    }
+  }
 
   return (
     <div
@@ -178,6 +205,44 @@ export function Board({
               {meep !== undefined && (
                 <MeepleIcon cx={x + hr * 0.44} cy={y - hr * 0.42} size={hr * 0.65} fill={playerColors[meep]} />
               )}
+            </g>
+          )
+        })}
+
+        {/* Pass 4: score/burn flash overlay (transient feedback after a withdraw) */}
+        {flash && (
+          <g key={`flash-${flash.id}`} style={{ pointerEvents: 'none' }}>
+            {flash.scoreCells.map((sk) => {
+              const [q, r] = parseKey(sk); const { x, y } = toPixel(q, r)
+              return <polygon key={`sc-${sk}`} className="score-pulse"
+                points={hexPoints(x, y, hr - 0.5)} fill="var(--withdraw-fill)" stroke="var(--withdraw-stroke)" strokeWidth={3} />
+            })}
+            {flash.burnCells.map((bk) => {
+              const [q, r] = parseKey(bk); const { x, y } = toPixel(q, r)
+              return <polygon key={`bn-${bk}`} className="burn-flash"
+                points={hexPoints(x, y, hr - 0.5)} fill="var(--color-accent)" stroke="var(--color-danger)" strokeWidth={2} />
+            })}
+            {flash.pts > 0 && (() => {
+              const [q, r] = parseKey(flash.key); const { x, y } = toPixel(q, r)
+              return <text className="score-float" x={x} y={y} textAnchor="middle" dominantBaseline="central"
+                fill="#2ea043" stroke="#fff" strokeWidth={0.9} paintOrder="stroke"
+                fontWeight={800} fontSize={hr * 0.95} fontFamily="system-ui, sans-serif">+{flash.pts}</text>
+            })()}
+          </g>
+        )}
+
+        {/* Pass 5: score-preview "+N" badges, always on top */}
+        {previewBadges.map(({ x, y, pts }, i) => {
+          const label = `+${pts}`
+          const w = hr * (0.42 + 0.24 * label.length)
+          const h = hr * 0.44
+          const by = y - hr * 0.5
+          return (
+            <g key={`badge-${i}`} style={{ pointerEvents: 'none' }}>
+              <rect x={x - w / 2} y={by - h / 2} width={w} height={h} rx={h / 2}
+                fill="#10161f" opacity={0.88} stroke="#fff" strokeWidth={0.6} />
+              <text x={x} y={by} textAnchor="middle" dominantBaseline="central"
+                fill="#fff" fontWeight={800} fontSize={hr * 0.34} fontFamily="system-ui, sans-serif">{label}</text>
             </g>
           )
         })}

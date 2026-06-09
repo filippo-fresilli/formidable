@@ -36,6 +36,15 @@ export interface GameState {
   lastAction?: string
 }
 
+/** Transient visual feedback for a scoring/burning withdraw (not persisted). */
+export interface Flash {
+  id: number
+  pts: number
+  key: string
+  scoreCells: string[]
+  burnCells: string[]
+}
+
 export interface HistoryState {
   past: GameState[]
   present: GameState

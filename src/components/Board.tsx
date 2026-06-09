@@ -199,9 +199,6 @@ export function Board({
               <polygon points={hexPoints(x, y, hr - 0.5)} style={{ fill, stroke, strokeWidth: sw }} />
               <OuterShape shape={card.os} cx={x} cy={y} inset={inset} fill="white" stroke={COLOR_STROKE[card.oc]} strokeWidth={hr * 0.08} />
               <InnerShape shape={card.is} cx={x} cy={y} inset={inset} fill={COLOR_HEX[card.ic]} stroke={COLOR_STROKE[card.ic]} strokeWidth={hr * 0.08} />
-              {meep === undefined && (
-                <circle cx={x + hr * 0.4} cy={y - hr * 0.4} r={hr * 0.18} fill="var(--color-danger)" opacity={0.8} />
-              )}
               {meep !== undefined && (
                 <MeepleIcon cx={x + hr * 0.44} cy={y - hr * 0.42} size={hr * 0.65} fill={playerColors[meep]} />
               )}

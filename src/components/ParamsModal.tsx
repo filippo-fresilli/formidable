@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Volume2, VolumeX, Sun, Moon, BarChart3, RotateCcw } from 'lucide-react'
+import { Volume2, VolumeX, Sun, Moon, BarChart3, RotateCcw, MessageSquare } from 'lucide-react'
 import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
@@ -278,6 +278,16 @@ export function ParamsModal({
         color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
       }}><BarChart3 size={15} />{t.statsLabel}</button>
+
+      {/* Feedback link — opens the user's mail client (does not auto-send) */}
+      <a
+        href={`mailto:filippo.fresilli@gmail.com?subject=${encodeURIComponent('Formidable — Feedback')}`}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+          marginTop: 12, color: 'var(--text-muted)', fontSize: 13,
+          textDecoration: 'none', fontWeight: 600,
+        }}
+      ><MessageSquare size={15} />{t.feedback}</a>
 
       <p style={{
         margin: '16px 0 0', fontSize: 11, color: 'var(--text-faint)',

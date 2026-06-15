@@ -272,6 +272,7 @@ export default function App() {
 
       {showWin && winner && (
         <WinModal winner={winner.name} score={winner.score} t={t}
+          elapsed={elapsed} scores={scores} names={PL}
           onRestart={() => { setShowWin(false); restart() }}
           onClose={() => setShowWin(false)}
         />

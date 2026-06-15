@@ -13,6 +13,7 @@ export interface I18nDict {
   botThinking: string; gameEnded: string
   resumeTitle: string; resumeTurn: string; resume: string; newGame: string; letsGo: string
   credits: string
+  shareButton: string; shareCopied: string; shareLine: string; shareScores: string
   difficulty: string
   soundOn: string; soundOff: string; themeLight: string; themeDark: string
   playerNameLabel: string
@@ -48,6 +49,8 @@ export const I18N: Record<Lang, I18nDict> = {
     botThinking: 'Bot sta giocando...', gameEnded: 'Partita terminata.',
     resumeTitle: 'Partita salvata', resumeTurn: 'Turno', resume: 'Riprendi →', newGame: 'Nuova partita', letsGo: 'Iniziamo! →',
     credits: 'Gioco realizzato e testato da Filippo Fresilli e Stefano Spensieri',
+    shareButton: 'Condividi', shareCopied: 'Copiato negli appunti!',
+    shareLine: '{name} vince con {score} punti in {time}!', shareScores: 'Punteggi',
     difficulty: 'Difficoltà bot', playerNameLabel: 'Il tuo nome', playerNamePlaceholder: 'Giocatore 1',
     soundOn: 'Suono', soundOff: 'Muto', themeLight: 'Chiaro', themeDark: 'Scuro',
     statsTitle: 'Statistiche', statsLabel: 'Statistiche', statsNoData: 'Nessuna partita giocata ancora.',
@@ -84,6 +87,8 @@ export const I18N: Record<Lang, I18nDict> = {
     botThinking: 'Bot is playing...', gameEnded: 'Game over.',
     resumeTitle: 'Saved game found', resumeTurn: 'Turn', resume: 'Resume →', newGame: 'New game', letsGo: "Let's go! →",
     credits: 'Game designed and tested by Filippo Fresilli and Stefano Spensieri',
+    shareButton: 'Share', shareCopied: 'Copied to clipboard!',
+    shareLine: '{name} wins with {score} points in {time}!', shareScores: 'Scores',
     difficulty: 'Bot difficulty', playerNameLabel: 'Your name', playerNamePlaceholder: 'Player 1',
     soundOn: 'Sound', soundOff: 'Muted', themeLight: 'Light', themeDark: 'Dark',
     statsTitle: 'Statistics', statsLabel: 'Statistics', statsNoData: 'No games played yet.',
@@ -120,6 +125,8 @@ export const I18N: Record<Lang, I18nDict> = {
     botThinking: 'Le bot joue...', gameEnded: 'Partie terminée.',
     resumeTitle: 'Partie sauvegardée', resumeTurn: 'Tour', resume: 'Reprendre →', newGame: 'Nouvelle partie', letsGo: 'C\'est parti ! →',
     credits: 'Jeu conçu et testé par Filippo Fresilli et Stefano Spensieri',
+    shareButton: 'Partager', shareCopied: 'Copié dans le presse-papiers !',
+    shareLine: '{name} gagne avec {score} points en {time} !', shareScores: 'Scores',
     difficulty: 'Difficulté bot', playerNameLabel: 'Ton nom', playerNamePlaceholder: 'Joueur 1',
     soundOn: 'Son', soundOff: 'Muet', themeLight: 'Clair', themeDark: 'Sombre',
     statsTitle: 'Statistiques', statsLabel: 'Statistiques', statsNoData: 'Aucune partie jouée encore.',

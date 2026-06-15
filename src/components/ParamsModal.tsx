@@ -6,6 +6,15 @@ import type { Theme } from '../game/storage'
 import { loadStats } from '../game/stats'
 import { ModalShell } from './ModalShell'
 
+// Secondary button: outlined, neutral — shared by the stats & feedback actions.
+const secondaryBtn: React.CSSProperties = {
+  flex: 1, padding: 9, borderRadius: 10, cursor: 'pointer', boxSizing: 'border-box',
+  border: '1.5px solid var(--border-default)', background: 'none',
+  color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+  textDecoration: 'none', whiteSpace: 'nowrap',
+}
+
 function ToggleGroup<T extends string | number>({
   options, selected, onSelect,
 }: { options: { id: T; label: string }[]; selected: T; onSelect: (id: T) => void }) {
@@ -271,23 +280,17 @@ export function ParamsModal({
         }}><RotateCcw size={16} />{t.restart}</button>
       )}
 
-      {/* Tertiary stats button — always visible */}
-      <button onClick={() => setView('stats')} style={{
-        width: '100%', padding: 9, borderRadius: 10, cursor: 'pointer',
-        border: '1.5px solid var(--border-default)', background: 'none',
-        color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-      }}><BarChart3 size={15} />{t.statsLabel}</button>
-
-      {/* Feedback link — opens the user's mail client (does not auto-send) */}
-      <a
-        href={`mailto:filippo.fresilli@gmail.com?subject=${encodeURIComponent('Formidable — Feedback')}`}
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          marginTop: 12, color: 'var(--text-muted)', fontSize: 13,
-          textDecoration: 'none', fontWeight: 600,
-        }}
-      ><MessageSquare size={15} />{t.feedback}</a>
+      {/* Stats + feedback — horizontally aligned secondary buttons */}
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button onClick={() => setView('stats')} style={secondaryBtn}>
+          <BarChart3 size={15} />{t.statsLabel}
+        </button>
+        {/* Feedback link — opens the user's mail client (does not auto-send) */}
+        <a
+          href={`mailto:filippo.fresilli@gmail.com?subject=${encodeURIComponent('Formidable — Feedback')}`}
+          style={secondaryBtn}
+        ><MessageSquare size={15} />{t.feedback}</a>
+      </div>
 
       <p style={{
         margin: '16px 0 0', fontSize: 11, color: 'var(--text-faint)',

@@ -10,18 +10,22 @@ import { ModalShell } from './ModalShell'
 function StatCard({ value, label }: { value: string | number; label: string }) {
   return (
     <div style={{
-      flex: 1, textAlign: 'center',
+      flex: '1 1 0', minWidth: 0, textAlign: 'center',
       background: 'var(--bg-panel-alt)',
       border: '1px solid var(--border-default)',
-      borderRadius: 10, padding: '12px 6px',
+      borderRadius: 10, padding: '10px 4px',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'flex-start',
+      minHeight: 72,
     }}>
       <div style={{
-        fontSize: 26, fontWeight: 800, color: 'var(--text-primary)',
+        fontSize: 24, fontWeight: 800, color: 'var(--text-primary)',
         lineHeight: 1, fontVariantNumeric: 'tabular-nums',
       }}>{value}</div>
       <div style={{
-        fontSize: 10, color: 'var(--text-muted)', marginTop: 5,
-        textTransform: 'uppercase', letterSpacing: '.04em', lineHeight: 1.3,
+        fontSize: 9, color: 'var(--text-muted)', marginTop: 5,
+        textTransform: 'uppercase', letterSpacing: '.03em', lineHeight: 1.3,
+        textAlign: 'center',
       }}>{label}</div>
     </div>
   )
@@ -117,7 +121,7 @@ export function StatsModal({ t, onClose }: StatsModalProps) {
   }
 
   return (
-    <ModalShell maxWidth={360} padding={28} onClose={onClose} hideCloseButton>
+    <ModalShell maxWidth={400} padding={28} onClose={onClose} hideCloseButton>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
         <h2 style={{ flex: 1, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>

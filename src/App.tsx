@@ -15,6 +15,7 @@ import { Board } from './components/Board'
 import { OnboardingModal } from './components/OnboardingModal'
 import { WinModal } from './components/WinModal'
 import { ParamsModal } from './components/ParamsModal'
+import { StatsModal } from './components/StatsModal'
 import { ModalShell } from './components/ModalShell'
 import { TopBar } from './components/TopBar'
 import { ScoreCard } from './components/ScoreCard'
@@ -45,6 +46,7 @@ export default function App() {
   // ── UI state ──────────────────────────────────────────────────────────────
   const [showOnboarding, setShowOnboarding]       = useState(false)
   const [showParams, setShowParams]               = useState(!isResume)
+  const [showStats, setShowStats]                 = useState(false)
   const [showWin, setShowWin]                     = useState(false)
   const [showResume, setShowResume]               = useState(isResume)
   const [paramsIsFirstOpen, setParamsIsFirstOpen] = useState(!isResume)
@@ -271,6 +273,10 @@ export default function App() {
         />
       )}
 
+      {showStats && (
+        <StatsModal t={t} onClose={() => setShowStats(false)} />
+      )}
+
       {showParams && (
         <ParamsModal t={t} lang={lang} setLang={setLang} numPlayers={numPlayers}
           onSetPlayers={(n) => { setNumPlayers(n); if (!paramsIsFirstOpen) restart(n) }}
@@ -306,6 +312,7 @@ export default function App() {
         t={t}
         onToggleTimer={() => setTimerActive((a) => !a)}
         onHelp={() => { initialOnboardingRef.current = false; setShowOnboarding(true) }}
+        onOpenStats={() => setShowStats(true)}
         onOpenSettings={() => setShowParams(true)}
       />
 

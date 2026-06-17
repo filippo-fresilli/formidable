@@ -1,15 +1,13 @@
-import React, { useState } from 'react'
-import { Volume2, VolumeX, Sun, Moon, BarChart3, RotateCcw, MessageSquare, CalendarDays, Flame, Share2, Check } from 'lucide-react'
+import React from 'react'
+import { Volume2, VolumeX, Sun, Moon, RotateCcw, MessageSquare, CalendarDays, Flame } from 'lucide-react'
 import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
-import { loadStats } from '../game/stats'
 import { dayNumber, currentStreak, hasPlayedToday, loadDaily } from '../game/daily'
 import { ModalShell } from './ModalShell'
 
-// Secondary button: outlined, neutral — shared by the stats & feedback actions.
-const secondaryBtn: React.CSSProperties = {
-  flex: 1, padding: 9, borderRadius: 10, cursor: 'pointer', boxSizing: 'border-box',
+const feedbackBtn: React.CSSProperties = {
+  width: '100%', padding: 9, borderRadius: 10, cursor: 'pointer', boxSizing: 'border-box',
   border: '1.5px solid var(--border-default)', background: 'none',
   color: 'var(--text-secondary)', fontSize: 13, fontWeight: 600, fontFamily: 'inherit',
   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
@@ -34,6 +32,8 @@ function ToggleGroup<T extends string | number>({
   )
 }
 
+
+
 interface ParamsModalProps {
   t: I18nDict
   lang: Lang
@@ -55,173 +55,6 @@ interface ParamsModalProps {
   onClose: () => void
 }
 
-// ── Simulation data (1000 games, medium difficulty) ───────────────────────────
-
-const SIM_DATA = [
-  { players: '2p', avgTurns: 29, range: '15–45', avgPts: 46, winChance: '50%' },
-  { players: '3p', avgTurns: 39, range: '22–62', avgPts: 42, winChance: '33%' },
-  { players: '4p', avgTurns: 48, range: '23–56', avgPts: 39, winChance: '25%' },
-]
-
-// ── Stats view ─────────────────────────────────────────────────────────────────
-
-function SectionHeader({ label, subtitle }: { label: string; subtitle?: string }) {
-  return (
-    <div style={{ marginTop: 18, marginBottom: 8 }}>
-      <div style={{
-        fontSize: 11, fontWeight: 700, color: 'var(--text-muted)',
-        textTransform: 'uppercase', letterSpacing: '.06em',
-      }}>{label}</div>
-      {subtitle && (
-        <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{subtitle}</div>
-      )}
-    </div>
-  )
-}
-
-// Wordle-style stat tile: big number + small caption.
-function StatTile({ value, label }: { value: string | number; label: string }) {
-  return (
-    <div style={{ flex: 1, textAlign: 'center' }}>
-      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
-      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3, textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</div>
-    </div>
-  )
-}
-
-function StatRow({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div style={{
-      display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-      padding: '8px 0', borderBottom: '1px solid var(--border-default)',
-    }}>
-      <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{label}</span>
-      <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>{value}</span>
-    </div>
-  )
-}
-
-function SimTable({ t }: { t: I18nDict }) {
-  const cols = [t.statsSimAvgTurns, t.statsSimRange, t.statsSimAvgPts, t.statsSimWinChance]
-  const cellStyle = (bold?: boolean): React.CSSProperties => ({
-    fontSize: 12, textAlign: 'center', padding: '6px 4px',
-    color: bold ? 'var(--text-primary)' : 'var(--text-secondary)',
-    fontWeight: bold ? 700 : 400,
-  })
-  return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-        <thead>
-          <tr style={{ borderBottom: '1px solid var(--border-default)' }}>
-            <th style={{ ...cellStyle(), textAlign: 'left', paddingLeft: 0 }}></th>
-            {cols.map(c => (
-              <th key={c} style={{ ...cellStyle(), fontWeight: 600, color: 'var(--text-muted)', fontSize: 11 }}>{c}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {SIM_DATA.map(row => (
-            <tr key={row.players} style={{ borderBottom: '1px solid var(--border-default)' }}>
-              <td style={{ ...cellStyle(true), textAlign: 'left', paddingLeft: 0 }}>{row.players}</td>
-              <td style={cellStyle()}>{row.avgTurns}</td>
-              <td style={cellStyle()}>{row.range}</td>
-              <td style={cellStyle()}>{row.avgPts} pt</td>
-              <td style={cellStyle()}>{row.winChance}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-function StatsView({ t, onBack, onClose }: { t: I18nDict; onBack: () => void; onClose: () => void }) {
-  const s = loadStats()
-  const hasData = s.gamesPlayed > 0
-  const avgTurns = hasData ? Math.round(s.totalTurns / s.gamesPlayed) : '—'
-  const winPct   = hasData ? Math.round((s.gamesWon / s.gamesPlayed) * 100) : 0
-  const winRate  = hasData ? `${winPct}%` : '—'
-  const avgScore = hasData ? (s.totalScore / s.gamesPlayed).toFixed(1) : '—'
-  const streak   = currentStreak()
-  const best     = loadDaily().bestStreak
-
-  const [copied, setCopied] = useState(false)
-  async function handleShare() {
-    const url = `${window.location.origin}${window.location.pathname}`
-    const text = `📊 Formidable\n${t.statsPlayedShort}: ${s.gamesPlayed} · ${t.statsWinShort}: ${winPct}%\n🔥 ${t.dailyStreakLabel}: ${streak} (${t.statsBestStreak}: ${best})\n${url}`
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Formidable', text, url }); return } catch { return }
-    }
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch { /* clipboard blocked */ }
-  }
-
-  return (
-    <ModalShell maxWidth={360} padding={28} onClose={undefined}>
-      {/* Header: chevron | title | ✕ */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
-        <button onClick={onBack} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          padding: '4px 8px 4px 0', lineHeight: 1, display: 'flex', alignItems: 'center',
-        }}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-faint)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
-        <h2 style={{ flex: 1, fontSize: 18, fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>
-          {t.statsTitle}
-        </h2>
-        <button onClick={onClose} style={{
-          background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: 20, color: 'var(--text-faint)', padding: 4, lineHeight: 1,
-        }}>✕</button>
-      </div>
-
-      {/* ── Statistiche del gioco (hardcoded simulation results) ── */}
-      <SectionHeader label={t.statsGameSection} subtitle={t.statsSimSubtitle} />
-      <SimTable t={t} />
-
-      {/* ── Statistiche del giocatore (localStorage) ── */}
-      <SectionHeader label={t.statsPlayerSection} />
-
-      {/* Wordle-style tiles: played · win% · current streak · best streak */}
-      <div style={{ display: 'flex', gap: 8, margin: '8px 0 14px' }}>
-        <StatTile value={s.gamesPlayed} label={t.statsPlayedShort} />
-        <StatTile value={hasData ? winRate : '—'} label={t.statsWinShort} />
-        <StatTile value={streak} label={t.dailyStreakLabel} />
-        <StatTile value={best} label={t.statsBestStreak} />
-      </div>
-
-      {hasData ? (
-        <>
-          <StatRow label={t.statsBestScore} value={`${s.bestScore} pt`} />
-          <StatRow label={t.statsAvgScore} value={`${avgScore} pt`} />
-          <StatRow label={t.statsAvgTurns} value={avgTurns} />
-          <StatRow label={t.statsFastestWin} value={s.fastestWin !== null ? `${s.fastestWin} turni` : '—'} />
-        </>
-      ) : (
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', textAlign: 'center', margin: '16px 0' }}>
-          {t.statsNoData}
-        </p>
-      )}
-
-      {/* Share CTA */}
-      <button onClick={handleShare} style={{
-        width: '100%', padding: '10px 0', borderRadius: 10, marginTop: 16, cursor: 'pointer',
-        border: 'none', background: 'var(--color-primary)', color: '#fff',
-        fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-      }}>
-        {copied ? <Check size={16} /> : <Share2 size={16} />}
-        {copied ? t.shareCopied : t.shareButton}
-      </button>
-    </ModalShell>
-  )
-}
-
 // ── Main modal ─────────────────────────────────────────────────────────────────
 
 export function ParamsModal({
@@ -230,12 +63,6 @@ export function ParamsModal({
   muted, setMuted, theme, setTheme,
   isFirstOpen = false, onStart, onStartDaily, onRestart, onClose,
 }: ParamsModalProps) {
-  const [view, setView] = useState<'settings' | 'stats'>('settings')
-
-  if (view === 'stats') {
-    return <StatsView t={t} onBack={() => setView('settings')} onClose={onClose} />
-  }
-
   const sec = (label: string, child: React.ReactNode) => (
     <div style={{ marginBottom: 18 }}>
       <div style={{
@@ -359,17 +186,11 @@ export function ParamsModal({
         }}><RotateCcw size={16} />{t.restart}</button>
       )}
 
-      {/* Stats + feedback — horizontally aligned secondary buttons */}
-      <div style={{ display: 'flex', gap: 10 }}>
-        <button onClick={() => setView('stats')} style={secondaryBtn}>
-          <BarChart3 size={15} />{t.statsLabel}
-        </button>
-        {/* Feedback link — opens the user's mail client (does not auto-send) */}
-        <a
-          href={`mailto:filippo.fresilli@gmail.com?subject=${encodeURIComponent('Formidable — Feedback')}`}
-          style={secondaryBtn}
-        ><MessageSquare size={15} />{t.feedback}</a>
-      </div>
+      {/* Feedback link — opens the user's mail client (does not auto-send) */}
+      <a
+        href={`mailto:filippo.fresilli@gmail.com?subject=${encodeURIComponent('Formidable — Feedback')}`}
+        style={feedbackBtn}
+      ><MessageSquare size={15} />{t.feedback}</a>
 
       <p style={{
         margin: '16px 0 0', fontSize: 11, color: 'var(--text-faint)',

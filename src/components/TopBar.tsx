@@ -1,4 +1,4 @@
-import { Settings, HelpCircle, Clock, Play, Pause, Save } from 'lucide-react'
+import { Settings, HelpCircle, Clock, Play, Pause, Save, BarChart3 } from 'lucide-react'
 import { panel, navBtn } from '../ui/styles'
 import type { I18nDict } from '../i18n'
 
@@ -14,12 +14,13 @@ interface TopBarProps {
   t: I18nDict
   onToggleTimer: () => void
   onHelp: () => void
+  onOpenStats: () => void
   onOpenSettings: () => void
 }
 
 export function TopBar({
   justSaved, elapsed, timerActive, gameOver, isDesktop, t,
-  onToggleTimer, onHelp, onOpenSettings,
+  onToggleTimer, onHelp, onOpenStats, onOpenSettings,
 }: TopBarProps) {
   return (
     <div style={{ ...panel, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
@@ -58,6 +59,9 @@ export function TopBar({
         )}
         <button className="btn-nav" onClick={onHelp} aria-label={t.params} style={navBtn(true)}>
           <HelpCircle size={18} />
+        </button>
+        <button className="btn-nav" onClick={onOpenStats} aria-label={t.statsTitle} style={navBtn(true)}>
+          <BarChart3 size={18} />
         </button>
         <button className="btn-nav" onClick={onOpenSettings} aria-label={t.params} style={{ ...navBtn(true), gap: 6 }}>
           <Settings size={18} />{isDesktop && <span>{t.params}</span>}

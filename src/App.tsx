@@ -4,6 +4,7 @@ import { makeGame } from './game/logic'
 import { type Difficulty } from './game/ai'
 import { saveGame, loadSave, clearSave, saveSettings, loadSettings, type Theme } from './game/storage'
 import { recordGameResult } from './game/stats'
+import { recordDailyResult, dayNumber } from './game/daily'
 import { trackGameStarted, trackGameCompleted, trackPwaInstalled } from './game/analytics'
 import { playSound } from './game/sounds'
 import { PLAYER_COLORS, PLAYER_COLORS_DARK } from './game/constants'
@@ -48,6 +49,7 @@ export default function App() {
   const [showResume, setShowResume]               = useState(isResume)
   const [paramsIsFirstOpen, setParamsIsFirstOpen] = useState(!isResume)
   const [winner, setWinner]                       = useState<{ name: string; score: number } | null>(null)
+  const [dailyResult, setDailyResult]             = useState<{ shareText: string; streak: number } | null>(null)
   const [elapsed, setElapsed]                     = useState(isResume ? (savedGame?.elapsed ?? 0) : 0)
   const [timerActive, setTimerActive]             = useState(false)
   const [justSaved, setJustSaved]                 = useState(false)
@@ -75,7 +77,7 @@ export default function App() {
 
   // ── Game logic ────────────────────────────────────────────────────────────
   const {
-    gs, flash,
+    gs, flash, isDaily, startDaily,
     busy, canBack, canFwd,
     placeCard, placeMeeple, skipMeeple, playerWithdraw, selectCard,
     restart: gameRestart, undo, redo,
@@ -93,6 +95,7 @@ export default function App() {
       setTimerActive(false)
       setShowWin(false)
       setShowResume(false)
+      setDailyResult(null)
     },
   })
 
@@ -126,13 +129,25 @@ export default function App() {
   useEffect(() => {
     if (gameOver && !showWin) {
       const wi = scores.indexOf(Math.max(...scores))
+      const won = wi === 0
       setWinner({ name: PL[wi], score: scores[wi] })
       playSound('win', mutedRef.current)
-      recordGameResult(scores[0], wi === 0, gs.log.length)
+      recordGameResult(scores[0], won, gs.log.length)
       trackGameCompleted({
-        won: wi === 0, score: scores[0], turns: gs.log.length,
+        won, score: scores[0], turns: gs.log.length,
         difficulty: difficultyRef.current, players: numPlayersRef.current,
       })
+      if (isDaily) {
+        const dr = recordDailyResult({ won, score: scores[0], turns: gs.log.length, elapsed })
+        const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
+        const line = t.dailyShareLine
+          .replace('{day}', String(dayNumber()))
+          .replace('{score}', String(scores[0]))
+          .replace('{turns}', String(gs.log.length))
+          .replace('{time}', fmt(elapsed))
+        const url = `${window.location.origin}${window.location.pathname}`
+        setDailyResult({ shareText: `${won ? '🏆' : '💪'} ${line}\n${url}`, streak: dr.streak })
+      }
       setTimeout(() => setShowWin(true), 600)
     }
   }, [gameOver]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -260,6 +275,7 @@ export default function App() {
         <ParamsModal t={t} lang={lang} setLang={setLang} numPlayers={numPlayers}
           onSetPlayers={(n) => { setNumPlayers(n); if (!paramsIsFirstOpen) restart(n) }}
           onStart={() => { setShowParams(false); setParamsIsFirstOpen(false); setShowOnboarding(true) }}
+          onStartDaily={() => { setShowParams(false); setParamsIsFirstOpen(false); startDaily() }}
           onRestart={() => restart()}
           difficulty={difficulty} setDifficulty={setDifficulty}
           playerName={playerName} setPlayerName={setPlayerName}
@@ -273,6 +289,8 @@ export default function App() {
       {showWin && winner && (
         <WinModal winner={winner.name} score={winner.score} t={t}
           elapsed={elapsed} scores={scores} names={PL}
+          dailyShareText={isDaily ? dailyResult?.shareText : undefined}
+          dailyStreak={isDaily ? dailyResult?.streak : undefined}
           onRestart={() => { setShowWin(false); restart() }}
           onClose={() => setShowWin(false)}
         />

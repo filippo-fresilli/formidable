@@ -12,6 +12,9 @@ interface WinModalProps {
   scores: number[]
   /** Display names of every player, by slot */
   names: string[]
+  /** When set, this is a daily challenge: share this text and show the streak */
+  dailyShareText?: string
+  dailyStreak?: number
   t: I18nDict
   onRestart: () => void
   onClose: () => void
@@ -36,11 +39,11 @@ function buildShareText(t: I18nDict, winner: string, score: number, elapsed: num
   return `🏆 Formidable\n${line}\n${t.shareScores}: ${others}\n${url}`
 }
 
-export function WinModal({ winner, score, elapsed, scores, names, t, onRestart, onClose }: WinModalProps) {
+export function WinModal({ winner, score, elapsed, scores, names, dailyShareText, dailyStreak, t, onRestart, onClose }: WinModalProps) {
   const [copied, setCopied] = useState(false)
 
   async function handleShare() {
-    const text = buildShareText(t, winner, score, elapsed, scores, names)
+    const text = dailyShareText ?? buildShareText(t, winner, score, elapsed, scores, names)
     const url = `${window.location.origin}${window.location.pathname}`
     // Native share sheet on mobile; the user picks the target and confirms there.
     if (navigator.share) {
@@ -59,6 +62,13 @@ export function WinModal({ winner, score, elapsed, scores, names, t, onRestart, 
       <div className="win-trophy" style={{ fontSize: 56, marginBottom: 12 }}>🏆</div>
       <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>{winner}</h2>
       <p style={{ fontSize: 15, color: 'var(--text-secondary)', marginBottom: 4 }}>{score} pt · {fmtTime(elapsed)}</p>
+      {dailyStreak != null && (
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 6,
+          padding: '4px 12px', borderRadius: 999, background: 'var(--color-primary-subtle)',
+          color: 'var(--color-primary)', fontSize: 13, fontWeight: 700,
+        }}>🔥 {t.dailyStreakLabel}: {dailyStreak}</div>
+      )}
 
       {/* Per-player final scores */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, margin: '14px 0 24px' }}>

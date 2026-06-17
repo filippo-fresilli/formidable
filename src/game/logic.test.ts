@@ -6,6 +6,7 @@ import {
   replenishHand, getBurnCells,
 } from './logic'
 import { runCpuTurn, opponentScoreDelta } from './ai'
+import { mulberry32, dailyRng } from './daily'
 import { I18N } from '../i18n'
 import type { Board, Card, GameState } from './types'
 
@@ -421,5 +422,22 @@ describe('bot hard competitivo', () => {
     runCpuTurn(g, 1, t, 'hard')
     expect(g.scores[1]).toBeGreaterThanOrEqual(50)
     expect(g.gameOver).toBe(true)
+  })
+})
+
+describe('sfida giornaliera (determinismo)', () => {
+  it('mulberry32 è deterministico', () => {
+    const a = mulberry32(123), b = mulberry32(123)
+    expect([a(), a(), a()]).toEqual([b(), b(), b()])
+  })
+
+  it('stesso giorno → stessa board e mani; giorni diversi → setup diverso', () => {
+    const g1 = makeGame(2, dailyRng(100))
+    const g2 = makeGame(2, dailyRng(100))
+    const g3 = makeGame(2, dailyRng(101))
+    expect(g1.board).toEqual(g2.board)
+    expect(g1.hands).toEqual(g2.hands)
+    expect(g1.deck).toEqual(g2.deck)
+    expect(g1.board).not.toEqual(g3.board)
   })
 })

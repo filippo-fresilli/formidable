@@ -24,7 +24,8 @@ export function hexPoints(cx: number, cy: number, r: number): string {
 
 // ── Deck ─────────────────────────────────────────────────────────────────────
 
-export function makeDeck(): Card[] {
+// `rand` lets callers pass a seeded PRNG (for the daily challenge); defaults to Math.random.
+export function makeDeck(rand: () => number = Math.random): Card[] {
   const d: Card[] = []
   for (const os of SHAPES)
     for (const oc of COLORS)
@@ -32,7 +33,7 @@ export function makeDeck(): Card[] {
         for (const ic of COLORS)
           d.push({ os, oc, is, ic })
   for (let i = d.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
+    const j = Math.floor(rand() * (i + 1))
     ;[d[i], d[j]] = [d[j], d[i]]
   }
   return d
@@ -161,8 +162,8 @@ export function doWithdraw(
 
 // ── Game factory ──────────────────────────────────────────────────────────────
 
-export function makeGame(numPlayers = 2): GameState {
-  const deck = makeDeck()
+export function makeGame(numPlayers = 2, rand: () => number = Math.random): GameState {
+  const deck = makeDeck(rand)
   const board: Board = {}
   const conquered: Conquered = {}
   const STARTS: Pos[] = [
@@ -176,7 +177,7 @@ export function makeGame(numPlayers = 2): GameState {
     for (let p = 0; p < numPlayers; p++)
       if (deck.length) hands[p].push(deck.pop()!)
 
-  const firstTurn = Math.floor(Math.random() * numPlayers)
+  const firstTurn = Math.floor(rand() * numPlayers)
   return {
     numPlayers, deck, discard: [],
     scores: Array(numPlayers).fill(0),

@@ -15,6 +15,7 @@ export interface I18nDict {
   credits: string
   shareButton: string; shareCopied: string; shareLine: string; shareScores: string
   feedback: string
+  dailyChallenge: string; dailyPlay: string; dailyDone: string; dailyStreakLabel: string; dailyShareLine: string
   difficulty: string
   soundOn: string; soundOff: string; themeLight: string; themeDark: string
   playerNameLabel: string
@@ -25,6 +26,7 @@ export interface I18nDict {
   statsSimAvgTurns: string; statsSimRange: string; statsSimAvgPts: string; statsSimWinChance: string
   statsGamesPlayed: string; statsAvgTurns: string; statsAvgTotalScore: string
   statsGamesWon: string; statsBestScore: string; statsAvgScore: string; statsFastestWin: string; statsWinRate: string
+  statsPlayedShort: string; statsWinShort: string; statsBestStreak: string
   diffLabels: Record<'easy' | 'medium' | 'hard', string>
   shapeNames: Record<'T' | 'Q' | 'C', string>
   colorNames: Record<'B' | 'R' | 'G', string>
@@ -53,6 +55,8 @@ export const I18N: Record<Lang, I18nDict> = {
     shareButton: 'Condividi', shareCopied: 'Copiato negli appunti!',
     shareLine: '{name} vince con {score} punti in {time}!', shareScores: 'Punteggi',
     feedback: 'Invia un feedback',
+    dailyChallenge: 'Sfida del giorno', dailyPlay: 'Gioca la sfida', dailyDone: 'Completata oggi ✓',
+    dailyStreakLabel: 'Serie', dailyShareLine: 'Formidable #{day} — {score} pt · {turns} turni · ⏱ {time}',
     difficulty: 'Difficoltà bot', playerNameLabel: 'Il tuo nome', playerNamePlaceholder: 'Giocatore 1',
     soundOn: 'Suono', soundOff: 'Muto', themeLight: 'Chiaro', themeDark: 'Scuro',
     statsTitle: 'Statistiche', statsLabel: 'Statistiche', statsNoData: 'Nessuna partita giocata ancora.',
@@ -62,6 +66,7 @@ export const I18N: Record<Lang, I18nDict> = {
     statsGamesPlayed: 'Partite giocate', statsAvgTurns: 'Turni medi', statsAvgTotalScore: 'Punteggio totale medio',
     statsGamesWon: 'Partite vinte', statsBestScore: 'Miglior punteggio', statsAvgScore: 'Punteggio medio',
     statsFastestWin: 'Vittoria più rapida', statsWinRate: 'Percentuale vittorie',
+    statsPlayedShort: 'Partite', statsWinShort: 'Vittorie', statsBestStreak: 'Record',
     diffLabels: { easy: '😌 Facile', medium: '🤔 Medio', hard: '🔥 Difficile' },
     shapeNames: { T: 'Triangolo', Q: 'Quadrato', C: 'Cerchio' },
     colorNames: { B: 'Blu', R: 'Rosso', G: 'Verde' },
@@ -92,6 +97,8 @@ export const I18N: Record<Lang, I18nDict> = {
     shareButton: 'Share', shareCopied: 'Copied to clipboard!',
     shareLine: '{name} wins with {score} points in {time}!', shareScores: 'Scores',
     feedback: 'Send feedback',
+    dailyChallenge: 'Daily challenge', dailyPlay: 'Play the challenge', dailyDone: 'Done today ✓',
+    dailyStreakLabel: 'Streak', dailyShareLine: 'Formidable #{day} — {score} pts · {turns} turns · ⏱ {time}',
     difficulty: 'Bot difficulty', playerNameLabel: 'Your name', playerNamePlaceholder: 'Player 1',
     soundOn: 'Sound', soundOff: 'Muted', themeLight: 'Light', themeDark: 'Dark',
     statsTitle: 'Statistics', statsLabel: 'Statistics', statsNoData: 'No games played yet.',
@@ -101,6 +108,7 @@ export const I18N: Record<Lang, I18nDict> = {
     statsGamesPlayed: 'Games played', statsAvgTurns: 'Average turns', statsAvgTotalScore: 'Average total score',
     statsGamesWon: 'Games won', statsBestScore: 'Best score', statsAvgScore: 'Average score',
     statsFastestWin: 'Fastest win', statsWinRate: 'Win rate',
+    statsPlayedShort: 'Played', statsWinShort: 'Wins', statsBestStreak: 'Best',
     diffLabels: { easy: '😌 Easy', medium: '🤔 Medium', hard: '🔥 Hard' },
     shapeNames: { T: 'Triangle', Q: 'Square', C: 'Circle' },
     colorNames: { B: 'Blue', R: 'Red', G: 'Green' },
@@ -131,6 +139,8 @@ export const I18N: Record<Lang, I18nDict> = {
     shareButton: 'Partager', shareCopied: 'Copié dans le presse-papiers !',
     shareLine: '{name} gagne avec {score} points en {time} !', shareScores: 'Scores',
     feedback: 'Envoyer un retour',
+    dailyChallenge: 'Défi du jour', dailyPlay: 'Jouer le défi', dailyDone: 'Fait aujourd\'hui ✓',
+    dailyStreakLabel: 'Série', dailyShareLine: 'Formidable #{day} — {score} pts · {turns} tours · ⏱ {time}',
     difficulty: 'Difficulté bot', playerNameLabel: 'Ton nom', playerNamePlaceholder: 'Joueur 1',
     soundOn: 'Son', soundOff: 'Muet', themeLight: 'Clair', themeDark: 'Sombre',
     statsTitle: 'Statistiques', statsLabel: 'Statistiques', statsNoData: 'Aucune partie jouée encore.',
@@ -140,6 +150,7 @@ export const I18N: Record<Lang, I18nDict> = {
     statsGamesPlayed: 'Parties jouées', statsAvgTurns: 'Tours moyens', statsAvgTotalScore: 'Score total moyen',
     statsGamesWon: 'Parties gagnées', statsBestScore: 'Meilleur score', statsAvgScore: 'Score moyen',
     statsFastestWin: 'Victoire la plus rapide', statsWinRate: 'Taux de victoire',
+    statsPlayedShort: 'Parties', statsWinShort: 'Victoires', statsBestStreak: 'Record',
     diffLabels: { easy: '😌 Facile', medium: '🤔 Moyen', hard: '🔥 Difficile' },
     shapeNames: { T: 'Triangle', Q: 'Carré', C: 'Cercle' },
     colorNames: { B: 'Bleu', R: 'Rouge', G: 'Vert' },

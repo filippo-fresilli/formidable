@@ -1,6 +1,7 @@
 import { useState, useReducer, useRef, useCallback, useEffect, type RefObject } from 'react'
 import { I18N, type Lang } from '../i18n'
 import { makeGame, cloneGame, replenishHand, doWithdraw, ck } from './logic'
+import { dailyRng } from './daily'
 import { runCpuTurn, type Difficulty } from './ai'
 import { clearSave } from './storage'
 import { playSound } from './sounds'
@@ -61,7 +62,11 @@ export function useGame({
   const [hist, dispatch] = useReducer(historyReducer, initialState)
   const [cpuBusy, setCpuBusy] = useState(false)
   const [flash, setFlash] = useState<Flash | null>(null)
+  const [isDaily, setIsDaily] = useState(false)
   const cpuRef = useRef(false)
+  // Daily challenge forces a fixed, deterministic bot difficulty (medium) so the
+  // game plays identically for everyone on the same seed.
+  const dailyRef = useRef(false)
   const gs = hist.present
 
   // ── CPU executor ────────────────────────────────────────────────────────────
@@ -72,7 +77,7 @@ export function useGame({
     cpuRef.current = true
     setCpuBusy(true)
     const tLocal = I18N[langRef.current!]
-    const diff = difficultyRef.current!
+    const diff: Difficulty = dailyRef.current ? 'medium' : difficultyRef.current!
 
     // Run ONE bot's full turn, make it visible, then pause ~half a second before
     // the next bot — so the player can follow who is playing and what they do.
@@ -205,9 +210,25 @@ export function useGame({
     cpuRef.current = false
     setCpuBusy(false)
     setFlash(null)
+    dailyRef.current = false
+    setIsDaily(false)
     const newGame = makeGame(n)
     dispatch({ type: 'RESET', game: newGame })
     onRestart(n)
+    if (newGame.turn !== 0) executeCpu(newGame)
+  }
+
+  // Start today's daily challenge: 2 players, seeded deck, deterministic bot.
+  function startDaily() {
+    clearSave()
+    cpuRef.current = false
+    setCpuBusy(false)
+    setFlash(null)
+    dailyRef.current = true
+    setIsDaily(true)
+    const newGame = makeGame(2, dailyRng())
+    dispatch({ type: 'RESET', game: newGame })
+    onRestart(2)
     if (newGame.turn !== 0) executeCpu(newGame)
   }
 
@@ -217,6 +238,8 @@ export function useGame({
   return {
     gs,
     flash,
+    isDaily,
+    startDaily,
     busy: cpuBusy || cpuRef.current,
     cpuBusy,
     canBack: hist.past.length > 0,

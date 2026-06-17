@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { Volume2, VolumeX, Sun, Moon, BarChart3, RotateCcw, MessageSquare } from 'lucide-react'
+import { Volume2, VolumeX, Sun, Moon, BarChart3, RotateCcw, MessageSquare, CalendarDays, Flame, Share2, Check } from 'lucide-react'
 import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
 import { loadStats } from '../game/stats'
+import { dayNumber, currentStreak, hasPlayedToday, loadDaily } from '../game/daily'
 import { ModalShell } from './ModalShell'
 
 // Secondary button: outlined, neutral — shared by the stats & feedback actions.
@@ -49,6 +50,7 @@ interface ParamsModalProps {
   setTheme: (th: Theme) => void
   isFirstOpen?: boolean
   onStart?: () => void
+  onStartDaily: () => void
   onRestart: () => void
   onClose: () => void
 }
@@ -73,6 +75,16 @@ function SectionHeader({ label, subtitle }: { label: string; subtitle?: string }
       {subtitle && (
         <div style={{ fontSize: 11, color: 'var(--text-faint)', marginTop: 2 }}>{subtitle}</div>
       )}
+    </div>
+  )
+}
+
+// Wordle-style stat tile: big number + small caption.
+function StatTile({ value, label }: { value: string | number; label: string }) {
+  return (
+    <div style={{ flex: 1, textAlign: 'center' }}>
+      <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>{value}</div>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 3, textTransform: 'uppercase', letterSpacing: '.04em' }}>{label}</div>
     </div>
   )
 }
@@ -127,8 +139,25 @@ function StatsView({ t, onBack, onClose }: { t: I18nDict; onBack: () => void; on
   const s = loadStats()
   const hasData = s.gamesPlayed > 0
   const avgTurns = hasData ? Math.round(s.totalTurns / s.gamesPlayed) : '—'
-  const winRate  = hasData ? `${Math.round((s.gamesWon / s.gamesPlayed) * 100)}%` : '—'
+  const winPct   = hasData ? Math.round((s.gamesWon / s.gamesPlayed) * 100) : 0
+  const winRate  = hasData ? `${winPct}%` : '—'
   const avgScore = hasData ? (s.totalScore / s.gamesPlayed).toFixed(1) : '—'
+  const streak   = currentStreak()
+  const best     = loadDaily().bestStreak
+
+  const [copied, setCopied] = useState(false)
+  async function handleShare() {
+    const url = `${window.location.origin}${window.location.pathname}`
+    const text = `📊 Formidable\n${t.statsPlayedShort}: ${s.gamesPlayed} · ${t.statsWinShort}: ${winPct}%\n🔥 ${t.dailyStreakLabel}: ${streak} (${t.statsBestStreak}: ${best})\n${url}`
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Formidable', text, url }); return } catch { return }
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch { /* clipboard blocked */ }
+  }
 
   return (
     <ModalShell maxWidth={360} padding={28} onClose={undefined}>
@@ -157,10 +186,17 @@ function StatsView({ t, onBack, onClose }: { t: I18nDict; onBack: () => void; on
 
       {/* ── Statistiche del giocatore (localStorage) ── */}
       <SectionHeader label={t.statsPlayerSection} />
+
+      {/* Wordle-style tiles: played · win% · current streak · best streak */}
+      <div style={{ display: 'flex', gap: 8, margin: '8px 0 14px' }}>
+        <StatTile value={s.gamesPlayed} label={t.statsPlayedShort} />
+        <StatTile value={hasData ? winRate : '—'} label={t.statsWinShort} />
+        <StatTile value={streak} label={t.dailyStreakLabel} />
+        <StatTile value={best} label={t.statsBestStreak} />
+      </div>
+
       {hasData ? (
         <>
-          <StatRow label={t.statsGamesPlayed} value={s.gamesPlayed} />
-          <StatRow label={t.statsGamesWon} value={`${s.gamesWon} (${winRate})`} />
           <StatRow label={t.statsBestScore} value={`${s.bestScore} pt`} />
           <StatRow label={t.statsAvgScore} value={`${avgScore} pt`} />
           <StatRow label={t.statsAvgTurns} value={avgTurns} />
@@ -171,6 +207,17 @@ function StatsView({ t, onBack, onClose }: { t: I18nDict; onBack: () => void; on
           {t.statsNoData}
         </p>
       )}
+
+      {/* Share CTA */}
+      <button onClick={handleShare} style={{
+        width: '100%', padding: '10px 0', borderRadius: 10, marginTop: 16, cursor: 'pointer',
+        border: 'none', background: 'var(--color-primary)', color: '#fff',
+        fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      }}>
+        {copied ? <Check size={16} /> : <Share2 size={16} />}
+        {copied ? t.shareCopied : t.shareButton}
+      </button>
     </ModalShell>
   )
 }
@@ -181,7 +228,7 @@ export function ParamsModal({
   t, lang, setLang, numPlayers, onSetPlayers,
   difficulty, setDifficulty, playerName, setPlayerName,
   muted, setMuted, theme, setTheme,
-  isFirstOpen = false, onStart, onRestart, onClose,
+  isFirstOpen = false, onStart, onStartDaily, onRestart, onClose,
 }: ParamsModalProps) {
   const [view, setView] = useState<'settings' | 'stats'>('settings')
 
@@ -199,6 +246,11 @@ export function ParamsModal({
     </div>
   )
 
+  const dDay = dayNumber()
+  const dStreak = currentStreak()
+  const dPlayed = hasPlayedToday()
+  const dLast = loadDaily().last
+
   return (
     <ModalShell maxWidth={360} padding={28} onClose={isFirstOpen ? undefined : onClose} hideCloseButton>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 20 }}>
@@ -210,6 +262,33 @@ export function ParamsModal({
           }}>✕</button>
         )}
       </div>
+
+      {/* Daily challenge */}
+      <div style={{
+        border: '1.5px solid var(--color-primary)', background: 'var(--color-primary-subtle)',
+        borderRadius: 12, padding: 12, marginBottom: 18,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
+            <CalendarDays size={16} />{t.dailyChallenge} #{dDay}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 13, fontWeight: 700, color: dStreak > 0 ? 'var(--color-accent)' : 'var(--text-muted)' }}>
+            <Flame size={15} />{dStreak}
+          </span>
+        </div>
+        {dPlayed ? (
+          <div style={{ textAlign: 'center', fontSize: 13, fontWeight: 700, color: 'var(--color-primary)', padding: '8px 0' }}>
+            {t.dailyDone}{dLast ? ` · ${dLast.score} pt` : ''}
+          </div>
+        ) : (
+          <button className="btn-primary" onClick={onStartDaily} style={{
+            width: '100%', padding: 10, borderRadius: 10, border: 'none',
+            background: 'var(--color-primary)', color: '#fff', cursor: 'pointer',
+            fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+          }}>{t.dailyPlay}</button>
+        )}
+      </div>
+
       {sec(t.playerNameLabel, (
         <input
           type="text"

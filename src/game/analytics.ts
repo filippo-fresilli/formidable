@@ -27,14 +27,30 @@ export function track(event: string, props?: EventProps): void {
 
 // ── Typed event helpers ───────────────────────────────────────────────────────
 
-export function trackGameStarted(p: { difficulty: string; players: number; lang: string }): void {
+export type GameMode = 'quick' | 'daily' | 'online'
+
+export function trackGameStarted(p: { mode: GameMode; difficulty: string; players: number; lang: string }): void {
   track('game_started', p)
 }
 
 export function trackGameCompleted(
-  p: { won: boolean; score: number; turns: number; difficulty: string; players: number },
+  p: { mode: GameMode; won: boolean; score: number; turns: number; difficulty: string; players: number },
 ): void {
   track('game_completed', p)
+}
+
+// ── Online-specific events ─────────────────────────────────────────────────────
+
+export function trackOnlineRoomCreated(p: { humans: number; bots: number; difficulty: string }): void {
+  track('online_room_created', p)
+}
+
+export function trackOnlineRoomJoined(): void {
+  track('online_room_joined')
+}
+
+export function trackOnlineCompleted(p: { won: boolean; players: number }): void {
+  track('online_completed', p)
 }
 
 export function trackPwaInstalled(): void {

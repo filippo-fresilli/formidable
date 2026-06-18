@@ -1,9 +1,10 @@
 import React from 'react'
-import { Volume2, VolumeX, Sun, Moon, RotateCcw, MessageSquare, CalendarDays, Flame } from 'lucide-react'
+import { Volume2, VolumeX, Sun, Moon, RotateCcw, MessageSquare, CalendarDays, Flame, Wifi } from 'lucide-react'
 import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
 import { dayNumber, currentStreak, hasPlayedToday, loadDaily } from '../game/daily'
+import { ONLINE_ENABLED } from '../game/socket'
 import { ModalShell } from './ModalShell'
 
 const feedbackBtn: React.CSSProperties = {
@@ -51,6 +52,7 @@ interface ParamsModalProps {
   isFirstOpen?: boolean
   onStart?: () => void
   onStartDaily: () => void
+  onStartOnline: () => void
   onRestart: () => void
   onClose: () => void
 }
@@ -61,7 +63,7 @@ export function ParamsModal({
   t, lang, setLang, numPlayers, onSetPlayers,
   difficulty, setDifficulty, playerName, setPlayerName,
   muted, setMuted, theme, setTheme,
-  isFirstOpen = false, onStart, onStartDaily, onRestart, onClose,
+  isFirstOpen = false, onStart, onStartDaily, onStartOnline, onRestart, onClose,
 }: ParamsModalProps) {
   const sec = (label: string, child: React.ReactNode) => (
     <div style={{ marginBottom: 18 }}>
@@ -115,6 +117,23 @@ export function ParamsModal({
           }}>{t.dailyPlay}</button>
         )}
       </div>
+
+      {/* Online multiplayer — hidden in production until a server is configured */}
+      {ONLINE_ENABLED && (
+        <div style={{
+          border: '1.5px solid var(--border-default)', background: 'var(--bg-panel-alt)',
+          borderRadius: 12, padding: 12, marginBottom: 18,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>
+            <Wifi size={16} />Gioca Online
+          </div>
+          <button className="btn-primary" onClick={onStartOnline} style={{
+            width: '100%', padding: 10, borderRadius: 10, border: 'none',
+            background: 'var(--text-secondary)', color: '#fff', cursor: 'pointer',
+            fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+          }}>Crea o unisciti</button>
+        </div>
+      )}
 
       {sec(t.playerNameLabel, (
         <input

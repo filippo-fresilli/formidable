@@ -16,7 +16,8 @@ export interface I18nDict {
   shareButton: string; shareCopied: string; shareLine: string; shareScores: string
   feedback: string
   dailyChallenge: string; dailyPlay: string; dailyDone: string; dailyStreakLabel: string; dailyShareLine: string
-  difficulty: string
+  playTitle: string; playQuick: string; playQuickSub: string; playDailySub: string; playOnline: string; playOnlineSub: string
+  difficulty: string; opponentsHint: string
   soundOn: string; soundOff: string; themeLight: string; themeDark: string
   playerNameLabel: string
   playerNamePlaceholder: string
@@ -55,9 +56,10 @@ export const I18N: Record<Lang, I18nDict> = {
     shareButton: 'Condividi', shareCopied: 'Copiato negli appunti!',
     shareLine: '{name} vince con {score} punti in {time}!', shareScores: 'Punteggi',
     feedback: 'Invia un feedback',
+    playTitle: 'Gioca', playQuick: 'Partita rapida', playQuickSub: 'Sfida i bot offline', playDailySub: 'Stessa sfida per tutti', playOnline: 'Gioca Online', playOnlineSub: 'Crea o unisciti con un codice',
     dailyChallenge: 'Sfida del giorno', dailyPlay: 'Gioca la sfida', dailyDone: 'Completata oggi ✓',
     dailyStreakLabel: 'Serie', dailyShareLine: 'Formidable #{day} — {score} pt · {turns} turni · ⏱ {time}',
-    difficulty: 'Difficoltà bot', playerNameLabel: 'Il tuo nome', playerNamePlaceholder: 'Giocatore 1',
+    difficulty: 'Difficoltà bot', opponentsHint: 'Valgono per la prossima Partita rapida.', playerNameLabel: 'Il tuo nome', playerNamePlaceholder: 'Giocatore 1',
     soundOn: 'Suono', soundOff: 'Muto', themeLight: 'Chiaro', themeDark: 'Scuro',
     statsTitle: 'Statistiche', statsLabel: 'Statistiche', statsNoData: 'Nessuna partita giocata ancora.',
     statsGameSection: 'Statistiche del gioco', statsPlayerSection: 'Statistiche del giocatore',
@@ -97,9 +99,10 @@ export const I18N: Record<Lang, I18nDict> = {
     shareButton: 'Share', shareCopied: 'Copied to clipboard!',
     shareLine: '{name} wins with {score} points in {time}!', shareScores: 'Scores',
     feedback: 'Send feedback',
+    playTitle: 'Play', playQuick: 'Quick game', playQuickSub: 'Take on the bots offline', playDailySub: 'Same puzzle for everyone', playOnline: 'Play Online', playOnlineSub: 'Create or join with a code',
     dailyChallenge: 'Daily challenge', dailyPlay: 'Play the challenge', dailyDone: 'Done today ✓',
     dailyStreakLabel: 'Streak', dailyShareLine: 'Formidable #{day} — {score} pts · {turns} turns · ⏱ {time}',
-    difficulty: 'Bot difficulty', playerNameLabel: 'Your name', playerNamePlaceholder: 'Player 1',
+    difficulty: 'Bot difficulty', opponentsHint: 'Applied to your next Quick game.', playerNameLabel: 'Your name', playerNamePlaceholder: 'Player 1',
     soundOn: 'Sound', soundOff: 'Muted', themeLight: 'Light', themeDark: 'Dark',
     statsTitle: 'Statistics', statsLabel: 'Statistics', statsNoData: 'No games played yet.',
     statsGameSection: 'Game statistics', statsPlayerSection: 'Player statistics',
@@ -139,9 +142,10 @@ export const I18N: Record<Lang, I18nDict> = {
     shareButton: 'Partager', shareCopied: 'Copié dans le presse-papiers !',
     shareLine: '{name} gagne avec {score} points en {time} !', shareScores: 'Scores',
     feedback: 'Envoyer un retour',
+    playTitle: 'Jouer', playQuick: 'Partie rapide', playQuickSub: 'Affronte les bots hors ligne', playDailySub: 'Même défi pour tous', playOnline: 'Jouer en ligne', playOnlineSub: 'Crée ou rejoins avec un code',
     dailyChallenge: 'Défi du jour', dailyPlay: 'Jouer le défi', dailyDone: 'Fait aujourd\'hui ✓',
     dailyStreakLabel: 'Série', dailyShareLine: 'Formidable #{day} — {score} pts · {turns} tours · ⏱ {time}',
-    difficulty: 'Difficulté bot', playerNameLabel: 'Ton nom', playerNamePlaceholder: 'Joueur 1',
+    difficulty: 'Difficulté bot', opponentsHint: 'Pour ta prochaine partie rapide.', playerNameLabel: 'Ton nom', playerNamePlaceholder: 'Joueur 1',
     soundOn: 'Son', soundOff: 'Muet', themeLight: 'Clair', themeDark: 'Sombre',
     statsTitle: 'Statistiques', statsLabel: 'Statistiques', statsNoData: 'Aucune partie jouée encore.',
     statsGameSection: 'Statistiques du jeu', statsPlayerSection: 'Statistiques du joueur',

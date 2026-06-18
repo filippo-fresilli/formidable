@@ -19,6 +19,7 @@ import { WinModal } from './components/WinModal'
 import { ParamsModal } from './components/ParamsModal'
 import { StatsModal } from './components/StatsModal'
 import { OnlineModal } from './components/OnlineModal'
+import { PlayModal } from './components/PlayModal'
 import { ModalShell } from './components/ModalShell'
 import { TopBar } from './components/TopBar'
 import { ScoreCard } from './components/ScoreCard'
@@ -51,12 +52,12 @@ export default function App() {
   const [showOnline, setShowOnline]               = useState(false)
   const [codeCopied, setCodeCopied]               = useState(false)
   const onlinePauseRef                            = useRef(false)
-  const [showOnboarding, setShowOnboarding]       = useState(false)
-  const [showParams, setShowParams]               = useState(!isResume)
+  const [showOnboarding, setShowOnboarding]       = useState(!isResume)
+  const [showParams, setShowParams]               = useState(false)
+  const [showPlay, setShowPlay]                   = useState(false)
   const [showStats, setShowStats]                 = useState(false)
   const [showWin, setShowWin]                     = useState(false)
   const [showResume, setShowResume]               = useState(isResume)
-  const [paramsIsFirstOpen, setParamsIsFirstOpen] = useState(!isResume)
   const [winner, setWinner]                       = useState<{ name: string; score: number } | null>(null)
   const [dailyResult, setDailyResult]             = useState<{ shareText: string; streak: number } | null>(null)
   const [elapsed, setElapsed]                     = useState(isResume ? (savedGame?.elapsed ?? 0) : 0)
@@ -142,18 +143,35 @@ export default function App() {
     gameRestart(np2)
   }
 
+  // ── Play menu (Gioca) ──────────────────────────────────────────────────────
+  function handleQuickGame() {
+    initialOnboardingRef.current = false
+    setShowPlay(false)
+    if (isOnline) stopOnline()
+    restart(numPlayers)
+  }
+
+  function handlePlayDaily() {
+    initialOnboardingRef.current = false
+    setShowPlay(false)
+    if (isOnline) stopOnline()
+    startDaily()
+  }
+
+  function handleOpenOnline() {
+    initialOnboardingRef.current = false
+    setShowPlay(false)
+    setShowOnline(true)
+  }
+
   function handleCreateRoom(opts: { humans: number; bots: number; difficulty: Difficulty }) {
     setShowOnline(false)
-    setShowParams(false)
-    setParamsIsFirstOpen(false)
     setIsOnline(true)
     online.createRoom(opts)
   }
 
   function handleJoinRoom(code: string) {
     setShowOnline(false)
-    setShowParams(false)
-    setParamsIsFirstOpen(false)
     setIsOnline(true)
     online.joinRoom(code)
   }
@@ -410,13 +428,23 @@ export default function App() {
         <OnboardingModal t={t}
           onClose={() => {
             setShowOnboarding(false)
-            if (initialOnboardingRef.current) { setParamsIsFirstOpen(true); setShowParams(true) }
+            // First launch: after the tutorial, show the Play menu to pick a mode.
+            if (initialOnboardingRef.current) setShowPlay(true)
           }}
           onStart={() => {
             setShowOnboarding(false)
-            initialOnboardingRef.current = false
-            restart(numPlayers)
+            if (initialOnboardingRef.current) setShowPlay(true)
           }}
+        />
+      )}
+
+      {showPlay && (
+        <PlayModal t={t} numPlayers={numPlayers}
+          onQuickGame={handleQuickGame}
+          onDaily={handlePlayDaily}
+          onOnline={handleOpenOnline}
+          isFirstOpen={initialOnboardingRef.current}
+          onClose={() => setShowPlay(false)}
         />
       )}
 
@@ -426,17 +454,12 @@ export default function App() {
 
       {showParams && (
         <ParamsModal t={t} lang={lang} setLang={setLang} numPlayers={numPlayers}
-          onSetPlayers={(n) => { setNumPlayers(n); if (!paramsIsFirstOpen) restart(n) }}
-          onStart={() => { setShowParams(false); setParamsIsFirstOpen(false); setShowOnboarding(true) }}
-          onStartDaily={() => { setShowParams(false); setParamsIsFirstOpen(false); startDaily() }}
-          onStartOnline={() => { setShowParams(false); setShowOnline(true) }}
-          onRestart={() => restart()}
+          onSetPlayers={(n) => setNumPlayers(n)}
           difficulty={difficulty} setDifficulty={setDifficulty}
           playerName={playerName} setPlayerName={setPlayerName}
           muted={muted} setMuted={setMuted}
           theme={theme} setTheme={setTheme}
-          isFirstOpen={paramsIsFirstOpen}
-          onClose={() => { setShowParams(false); setParamsIsFirstOpen(false) }}
+          onClose={() => setShowParams(false)}
         />
       )}
 
@@ -459,6 +482,7 @@ export default function App() {
         isDesktop={isDesktop}
         t={t}
         onToggleTimer={() => setTimerActive((a) => !a)}
+        onOpenPlay={() => setShowPlay(true)}
         onHelp={() => { initialOnboardingRef.current = false; setShowOnboarding(true) }}
         onOpenStats={() => setShowStats(true)}
         onOpenSettings={() => setShowParams(true)}

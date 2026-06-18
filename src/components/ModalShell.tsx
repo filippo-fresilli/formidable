@@ -38,6 +38,7 @@ export function ModalShell({
         style={{
           background: 'var(--bg-panel)', borderRadius: 16, padding, maxWidth, width: '100%',
           boxShadow: '0 20px 60px rgba(0,0,0,0.3)', position: 'relative',
+          maxHeight: '90vh', overflowY: 'auto',
           ...(textAlign ? { textAlign } : {}),
         }}
       >

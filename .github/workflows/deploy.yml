@@ -30,6 +30,10 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          # Set this repo variable (Settings → Secrets and variables → Actions →
+          # Variables) to the deployed server URL to enable online play in prod.
+          VITE_SERVER_URL: ${{ vars.VITE_SERVER_URL }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -10,7 +10,9 @@ const app = express()
 app.get('/health', (_req, res) => res.json({ status: 'ok' }))
 
 const httpServer = createServer(app)
-const io = new Server(httpServer, { cors: { origin: '*' } })
+// Restrict to the deployed client origin in production; '*' by default for local dev.
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN ?? '*'
+const io = new Server(httpServer, { cors: { origin: CLIENT_ORIGIN } })
 
 const t = I18N['it']
 

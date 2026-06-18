@@ -4,6 +4,7 @@ import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
 import { dayNumber, currentStreak, hasPlayedToday, loadDaily } from '../game/daily'
+import { ONLINE_ENABLED } from '../game/socket'
 import { ModalShell } from './ModalShell'
 
 const feedbackBtn: React.CSSProperties = {
@@ -117,20 +118,22 @@ export function ParamsModal({
         )}
       </div>
 
-      {/* Online multiplayer */}
-      <div style={{
-        border: '1.5px solid var(--border-default)', background: 'var(--bg-panel-alt)',
-        borderRadius: 12, padding: 12, marginBottom: 18,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>
-          <Wifi size={16} />Gioca Online
+      {/* Online multiplayer — hidden in production until a server is configured */}
+      {ONLINE_ENABLED && (
+        <div style={{
+          border: '1.5px solid var(--border-default)', background: 'var(--bg-panel-alt)',
+          borderRadius: 12, padding: 12, marginBottom: 18,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>
+            <Wifi size={16} />Gioca Online
+          </div>
+          <button className="btn-primary" onClick={onStartOnline} style={{
+            width: '100%', padding: 10, borderRadius: 10, border: 'none',
+            background: 'var(--text-secondary)', color: '#fff', cursor: 'pointer',
+            fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+          }}>Crea o unisciti</button>
         </div>
-        <button className="btn-primary" onClick={onStartOnline} style={{
-          width: '100%', padding: 10, borderRadius: 10, border: 'none',
-          background: 'var(--text-secondary)', color: '#fff', cursor: 'pointer',
-          fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-        }}>Crea o unisciti</button>
-      </div>
+      )}
 
       {sec(t.playerNameLabel, (
         <input

@@ -129,7 +129,7 @@ export function ParamsModal({
           width: '100%', padding: 10, borderRadius: 10, border: 'none',
           background: 'var(--text-secondary)', color: '#fff', cursor: 'pointer',
           fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
-        }}>Connettiti</button>
+        }}>Crea o unisciti</button>
       </div>
 
       {sec(t.playerNameLabel, (

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { Copy, Check } from 'lucide-react'
 import { I18N, type Lang } from './i18n'
 import { makeGame } from './game/logic'
 import { type Difficulty } from './game/ai'
@@ -17,6 +18,7 @@ import { OnboardingModal } from './components/OnboardingModal'
 import { WinModal } from './components/WinModal'
 import { ParamsModal } from './components/ParamsModal'
 import { StatsModal } from './components/StatsModal'
+import { OnlineModal } from './components/OnlineModal'
 import { ModalShell } from './components/ModalShell'
 import { TopBar } from './components/TopBar'
 import { ScoreCard } from './components/ScoreCard'
@@ -46,6 +48,8 @@ export default function App() {
 
   // ── UI state ──────────────────────────────────────────────────────────────
   const [isOnline, setIsOnline]                   = useState(false)
+  const [showOnline, setShowOnline]               = useState(false)
+  const [codeCopied, setCodeCopied]               = useState(false)
   const onlinePauseRef                            = useRef(false)
   const [showOnboarding, setShowOnboarding]       = useState(false)
   const [showParams, setShowParams]               = useState(!isResume)
@@ -122,8 +126,13 @@ export default function App() {
 
   const { board, meeples, conquered, scores, tokens, hands, turn, phase, selIdx, log, placedPos, gameOver, numPlayers: np } = gs
   const t            = I18N[lang]
+  // Online opponents are labelled by their transposed slot's real type (human/bot).
   const PL           = isOnline
-    ? Array.from({ length: 4 }, (_, i) => i === 0 ? (playerName.trim() || t.player1) : `Giocatore ${i + 1}`)
+    ? Array.from({ length: np }, (_, i) => {
+        if (i === 0) return playerName.trim() || t.player1
+        const serverIdx = (i + (online.playerIdx ?? 0)) % np
+        return online.playerTypes?.[serverIdx] === 'bot' ? `Bot ${i}` : `Giocatore ${i + 1}`
+      })
     : [playerName.trim() || t.player1, t.bot1, t.bot2, t.bot3]
   const playerColors = theme === 'dark' ? PLAYER_COLORS_DARK : PLAYER_COLORS
 
@@ -133,11 +142,20 @@ export default function App() {
     gameRestart(np2)
   }
 
-  function startOnline() {
-    setIsOnline(true)
+  function handleCreateRoom(opts: { humans: number; bots: number; difficulty: Difficulty }) {
+    setShowOnline(false)
     setShowParams(false)
     setParamsIsFirstOpen(false)
-    online.connect()
+    setIsOnline(true)
+    online.createRoom(opts)
+  }
+
+  function handleJoinRoom(code: string) {
+    setShowOnline(false)
+    setShowParams(false)
+    setParamsIsFirstOpen(false)
+    setIsOnline(true)
+    online.joinRoom(code)
   }
 
   function stopOnline() {
@@ -265,14 +283,23 @@ export default function App() {
 
   return (
     <div className="app-root">
-      {/* ── Online: waiting / error overlay ─────────────────────────────── */}
-      {isOnline && (online.status === 'waiting' || online.status === 'connecting' || online.status === 'error') && (
+      {/* ── Online setup modal (create / join) ──────────────────────────── */}
+      {showOnline && (
+        <OnlineModal t={t}
+          onCreate={handleCreateRoom}
+          onJoin={handleJoinRoom}
+          onClose={() => setShowOnline(false)}
+        />
+      )}
+
+      {/* ── Online: lobby / connecting / error overlay ──────────────────── */}
+      {isOnline && (online.status === 'lobby' || online.status === 'connecting' || online.status === 'error') && (
         <ModalShell maxWidth={340} padding={36} textAlign="center">
           {online.status === 'error' ? (
             <>
               <div style={{ fontSize: 40, marginBottom: 12 }}>❌</div>
               <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
-                Connessione persa
+                Ops
               </h2>
               <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>
                 {online.errorMsg ?? 'Errore di connessione'}
@@ -281,17 +308,46 @@ export default function App() {
           ) : (
             <>
               <div style={{ fontSize: 40, marginBottom: 12 }}>🌐</div>
-              <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
-                {online.status === 'connecting' ? 'Connessione…' : 'In attesa di un avversario'}
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>
+                {online.status === 'connecting' ? 'Connessione…' : 'Sala d\'attesa'}
               </h2>
-              {online.playerIdx !== null && (
-                <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>
-                  Sei il <strong>Giocatore {(online.playerIdx) + 1}</strong>
+              {online.code && (
+                <>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>
+                    Condividi questo codice:
+                  </p>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                    marginBottom: 16,
+                  }}>
+                    <span style={{
+                      fontSize: 34, fontWeight: 800, letterSpacing: '.25em',
+                      color: 'var(--color-primary)', fontFamily: 'monospace',
+                    }}>{online.code}</span>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard?.writeText(online.code!).then(() => {
+                          setCodeCopied(true)
+                          setTimeout(() => setCodeCopied(false), 1500)
+                        }).catch(() => {})
+                      }}
+                      aria-label="Copia codice"
+                      style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 38, height: 38, borderRadius: 10, cursor: 'pointer',
+                        border: '1.5px solid var(--border-default)', background: 'var(--bg-panel-alt)',
+                        color: codeCopied ? 'var(--color-primary)' : 'var(--text-secondary)',
+                      }}
+                    >{codeCopied ? <Check size={18} /> : <Copy size={18} />}</button>
+                  </div>
+                </>
+              )}
+              {online.lobby && (
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>
+                  Giocatori: <strong>{online.lobby.joined}/{online.lobby.joined + online.lobby.needed}</strong>
+                  {online.lobby.needed > 0 ? ' — in attesa…' : ''}
                 </p>
               )}
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
-                Apri questa pagina in un'altra scheda per giocare
-              </p>
             </>
           )}
           <button onClick={stopOnline} style={{
@@ -311,7 +367,7 @@ export default function App() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '4px 14px',
         }}>
-          <span>🌐 Online · Giocatore {(online.playerIdx ?? 0) + 1}</span>
+          <span>🌐 Online{online.code ? ` · ${online.code}` : ''} · Giocatore {(online.playerIdx ?? 0) + 1}</span>
           <button onClick={stopOnline} style={{
             background: 'rgba(255,255,255,0.25)', border: 'none', borderRadius: 5,
             color: '#fff', cursor: 'pointer', padding: '2px 8px', fontSize: 11, fontWeight: 700,
@@ -373,7 +429,7 @@ export default function App() {
           onSetPlayers={(n) => { setNumPlayers(n); if (!paramsIsFirstOpen) restart(n) }}
           onStart={() => { setShowParams(false); setParamsIsFirstOpen(false); setShowOnboarding(true) }}
           onStartDaily={() => { setShowParams(false); setParamsIsFirstOpen(false); startDaily() }}
-          onStartOnline={startOnline}
+          onStartOnline={() => { setShowParams(false); setShowOnline(true) }}
           onRestart={() => restart()}
           difficulty={difficulty} setDifficulty={setDifficulty}
           playerName={playerName} setPlayerName={setPlayerName}

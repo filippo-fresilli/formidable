@@ -6,7 +6,7 @@ import { type Difficulty } from './game/ai'
 import { saveGame, loadSave, clearSave, saveSettings, loadSettings, type Theme } from './game/storage'
 import { recordGameResult } from './game/stats'
 import { recordDailyResult, dayNumber } from './game/daily'
-import { trackGameStarted, trackGameCompleted, trackPwaInstalled } from './game/analytics'
+import { trackGameStarted, trackGameCompleted, trackOnlineRoomCreated, trackOnlineRoomJoined, trackOnlineCompleted, trackPwaInstalled } from './game/analytics'
 import { playSound } from './game/sounds'
 import { PLAYER_COLORS, PLAYER_COLORS_DARK } from './game/constants'
 import type { HistoryState } from './game/types'
@@ -139,7 +139,7 @@ export default function App() {
 
   function restart(np2?: number) {
     if (isOnline) { online.restart(); return }
-    trackGameStarted({ difficulty, players: np2 ?? numPlayers, lang })
+    trackGameStarted({ mode: 'quick', difficulty, players: np2 ?? numPlayers, lang })
     gameRestart(np2)
   }
 
@@ -155,6 +155,7 @@ export default function App() {
     initialOnboardingRef.current = false
     setShowPlay(false)
     if (isOnline) stopOnline()
+    trackGameStarted({ mode: 'daily', difficulty: 'medium', players: 2, lang })
     startDaily()
   }
 
@@ -167,12 +168,14 @@ export default function App() {
   function handleCreateRoom(opts: { humans: number; bots: number; difficulty: Difficulty }) {
     setShowOnline(false)
     setIsOnline(true)
+    trackOnlineRoomCreated({ humans: opts.humans, bots: opts.bots, difficulty: opts.difficulty })
     online.createRoom(opts)
   }
 
   function handleJoinRoom(code: string) {
     setShowOnline(false)
     setIsOnline(true)
+    trackOnlineRoomJoined()
     online.joinRoom(code)
   }
 
@@ -183,13 +186,12 @@ export default function App() {
 
   // ── Effects ───────────────────────────────────────────────────────────────
 
-  // Analytics: first game of the session (a resumed game is not a "start") + PWA install
+  // Analytics: PWA install. Game starts are tracked when the player actually
+  // picks a mode (quick/daily/online), not on mount — see restart()/handlePlay*.
   useEffect(() => {
-    if (!isResume) trackGameStarted({ difficulty, players: numPlayers, lang })
     const onInstalled = () => trackPwaInstalled()
     window.addEventListener('appinstalled', onInstalled)
     return () => window.removeEventListener('appinstalled', onInstalled)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
@@ -204,10 +206,14 @@ export default function App() {
       const won = wi === 0
       setWinner({ name: PL[wi], score: scores[wi] })
       playSound('win', mutedRef.current)
-      // Online games don't track a local turn log; keep them out of offline stats.
-      if (!isOnline) {
+      // Online games don't track a local turn log; keep them out of offline stats,
+      // but still record an analytics event so online usage is visible.
+      if (isOnline) {
+        trackOnlineCompleted({ won, players: numPlayersRef.current })
+      } else {
         recordGameResult(scores[0], won, gs.log.length)
         trackGameCompleted({
+          mode: isDaily ? 'daily' : 'quick',
           won, score: scores[0], turns: gs.log.length,
           difficulty: difficultyRef.current, players: numPlayersRef.current,
         })

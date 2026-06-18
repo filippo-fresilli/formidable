@@ -1,0 +1,13 @@
+# Railway/Nixpacks config for the multiplayer server.
+# The server runs TypeScript directly via tsx, so there is NO build step:
+# we skip Nixpacks' default `npm run build` (which would build the Vite client
+# and is irrelevant — and was failing — for the backend).
+
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.build]
+cmds = []
+
+[start]
+cmd = "npm start"

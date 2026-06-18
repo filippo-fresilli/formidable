@@ -41,6 +41,8 @@ interface UseGameOptions {
   difficultyRef: RefObject<Difficulty>
   /** True only during the very first onboarding; prevents CPU from running early */
   initialOnboardingRef: RefObject<boolean>
+  /** When true, suppresses all bot turns (used while online mode is active) */
+  pauseRef?: RefObject<boolean>
   /** Called when the player places a card (starts the timer) */
   onTimerStart: () => void
   /** Called after restart so App can reset timer/win/resume UI state */
@@ -56,6 +58,7 @@ export function useGame({
   langRef,
   difficultyRef,
   initialOnboardingRef,
+  pauseRef,
   onTimerStart,
   onRestart,
 }: UseGameOptions) {
@@ -73,6 +76,7 @@ export function useGame({
 
   const executeCpu = useCallback((baseGame: GameState) => {
     if (cpuRef.current) return
+    if (pauseRef?.current) return
     if (!baseGame || baseGame.turn === 0 || baseGame.gameOver) return
     cpuRef.current = true
     setCpuBusy(true)

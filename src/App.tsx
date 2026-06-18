@@ -10,6 +10,7 @@ import { playSound } from './game/sounds'
 import { PLAYER_COLORS, PLAYER_COLORS_DARK } from './game/constants'
 import type { HistoryState } from './game/types'
 import { useGame } from './game/useGame'
+import { useOnlineGame } from './game/useOnlineGame'
 import { useMediaQuery } from './ui/useMediaQuery'
 import { Board } from './components/Board'
 import { OnboardingModal } from './components/OnboardingModal'
@@ -44,6 +45,8 @@ export default function App() {
   const [difficulty, setDifficulty] = useState<Difficulty>(savedSettings?.difficulty ?? 'medium')
 
   // ── UI state ──────────────────────────────────────────────────────────────
+  const [isOnline, setIsOnline]                   = useState(false)
+  const onlinePauseRef                            = useRef(false)
   const [showOnboarding, setShowOnboarding]       = useState(false)
   const [showParams, setShowParams]               = useState(!isResume)
   const [showStats, setShowStats]                 = useState(false)
@@ -78,10 +81,15 @@ export default function App() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // ── Game logic ────────────────────────────────────────────────────────────
+  const online = useOnlineGame()
+  onlinePauseRef.current = isOnline
+
   const {
-    gs, flash, isDaily, startDaily,
-    busy, canBack, canFwd,
-    placeCard, placeMeeple, skipMeeple, playerWithdraw, selectCard,
+    gs: offlineGs, flash, isDaily, startDaily,
+    busy: offlineBusy, canBack, canFwd,
+    placeCard: offlinePlaceCard, placeMeeple: offlinePlaceMeeple,
+    skipMeeple: offlineSkipMeeple, playerWithdraw: offlineWithdraw,
+    selectCard: offlineSelectCard,
     restart: gameRestart, undo, redo,
   } = useGame({
     initialState,
@@ -90,6 +98,7 @@ export default function App() {
     langRef,
     difficultyRef,
     initialOnboardingRef,
+    pauseRef: onlinePauseRef,
     onTimerStart: () => setTimerActive(true),
     onRestart: (n) => {
       setNumPlayers(n)
@@ -101,14 +110,39 @@ export default function App() {
     },
   })
 
+  // ── Online / offline mux ─────────────────────────────────────────────────
+  // When online, use server state + online actions; offline hook stays idle.
+  const gs           = (isOnline && online.gs) ? online.gs : offlineGs
+  const busy         = isOnline ? false : offlineBusy
+  const placeCard    = isOnline ? online.placeCard    : offlinePlaceCard
+  const placeMeeple  = isOnline ? online.placeMeeple  : offlinePlaceMeeple
+  const skipMeeple   = isOnline ? online.skipMeeple   : offlineSkipMeeple
+  const playerWithdraw = isOnline ? online.playerWithdraw : offlineWithdraw
+  const selectCard   = isOnline ? online.selectCard   : offlineSelectCard
+
   const { board, meeples, conquered, scores, tokens, hands, turn, phase, selIdx, log, placedPos, gameOver, numPlayers: np } = gs
   const t            = I18N[lang]
-  const PL           = [playerName.trim() || t.player1, t.bot1, t.bot2, t.bot3]
+  const PL           = isOnline
+    ? Array.from({ length: 4 }, (_, i) => i === 0 ? (playerName.trim() || t.player1) : `Giocatore ${i + 1}`)
+    : [playerName.trim() || t.player1, t.bot1, t.bot2, t.bot3]
   const playerColors = theme === 'dark' ? PLAYER_COLORS_DARK : PLAYER_COLORS
 
   function restart(np2?: number) {
+    if (isOnline) { online.restart(); return }
     trackGameStarted({ difficulty, players: np2 ?? numPlayers, lang })
     gameRestart(np2)
+  }
+
+  function startOnline() {
+    setIsOnline(true)
+    setShowParams(false)
+    setParamsIsFirstOpen(false)
+    online.connect()
+  }
+
+  function stopOnline() {
+    online.disconnect()
+    setIsOnline(false)
   }
 
   // ── Effects ───────────────────────────────────────────────────────────────
@@ -134,11 +168,14 @@ export default function App() {
       const won = wi === 0
       setWinner({ name: PL[wi], score: scores[wi] })
       playSound('win', mutedRef.current)
-      recordGameResult(scores[0], won, gs.log.length)
-      trackGameCompleted({
-        won, score: scores[0], turns: gs.log.length,
-        difficulty: difficultyRef.current, players: numPlayersRef.current,
-      })
+      // Online games don't track a local turn log; keep them out of offline stats.
+      if (!isOnline) {
+        recordGameResult(scores[0], won, gs.log.length)
+        trackGameCompleted({
+          won, score: scores[0], turns: gs.log.length,
+          difficulty: difficultyRef.current, players: numPlayersRef.current,
+        })
+      }
       if (isDaily) {
         const dr = recordDailyResult({ won, score: scores[0], turns: gs.log.length, elapsed })
         const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`
@@ -228,6 +265,60 @@ export default function App() {
 
   return (
     <div className="app-root">
+      {/* ── Online: waiting / error overlay ─────────────────────────────── */}
+      {isOnline && (online.status === 'waiting' || online.status === 'connecting' || online.status === 'error') && (
+        <ModalShell maxWidth={340} padding={36} textAlign="center">
+          {online.status === 'error' ? (
+            <>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>❌</div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+                Connessione persa
+              </h2>
+              <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 24 }}>
+                {online.errorMsg ?? 'Errore di connessione'}
+              </p>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 40, marginBottom: 12 }}>🌐</div>
+              <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 8 }}>
+                {online.status === 'connecting' ? 'Connessione…' : 'In attesa di un avversario'}
+              </h2>
+              {online.playerIdx !== null && (
+                <p style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>
+                  Sei il <strong>Giocatore {(online.playerIdx) + 1}</strong>
+                </p>
+              )}
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
+                Apri questa pagina in un'altra scheda per giocare
+              </p>
+            </>
+          )}
+          <button onClick={stopOnline} style={{
+            padding: '10px 24px', borderRadius: 10, border: 'none',
+            background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
+            fontSize: 14, fontWeight: 700, fontFamily: 'inherit',
+          }}>Esci</button>
+        </ModalShell>
+      )}
+
+      {/* ── Online playing: slim banner ──────────────────────────────────── */}
+      {isOnline && online.status === 'playing' && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 500,
+          background: 'var(--color-primary)', color: '#fff',
+          fontSize: 12, fontWeight: 600,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '4px 14px',
+        }}>
+          <span>🌐 Online · Giocatore {(online.playerIdx ?? 0) + 1}</span>
+          <button onClick={stopOnline} style={{
+            background: 'rgba(255,255,255,0.25)', border: 'none', borderRadius: 5,
+            color: '#fff', cursor: 'pointer', padding: '2px 8px', fontSize: 11, fontWeight: 700,
+          }}>Esci</button>
+        </div>
+      )}
+
       {/* ── Modals ───────────────────────────────────────────────────────── */}
 
       {showResume && (
@@ -282,6 +373,7 @@ export default function App() {
           onSetPlayers={(n) => { setNumPlayers(n); if (!paramsIsFirstOpen) restart(n) }}
           onStart={() => { setShowParams(false); setParamsIsFirstOpen(false); setShowOnboarding(true) }}
           onStartDaily={() => { setShowParams(false); setParamsIsFirstOpen(false); startDaily() }}
+          onStartOnline={startOnline}
           onRestart={() => restart()}
           difficulty={difficulty} setDifficulty={setDifficulty}
           playerName={playerName} setPlayerName={setPlayerName}

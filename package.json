@@ -8,17 +8,22 @@
     "build": "tsc -b && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
+    "server": "tsx watch server/index.ts",
     "simulate": "npx tsx src/game/simulate.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "express": "^5.2.1",
     "lucide-react": "^1.17.0",
     "react": "^19.2.6",
-    "react-dom": "^19.2.6"
+    "react-dom": "^19.2.6",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/express": "^5.0.6",
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -28,6 +33,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "sharp": "^0.34.5",
+    "tsx": "^4.22.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.59.2",
     "vite": "^8.0.12",

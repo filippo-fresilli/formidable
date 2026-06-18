@@ -81,10 +81,16 @@ export function useOnlineGame(): UseOnlineGameResult {
     socket.on('state',       (g: GameState)   => { setServerGs(g); setStatus('playing'); setSelIdx(-1) })
     socket.on('join_error',  ({ reason }: { reason: string }) => { setStatus('error'); setErrorMsg(reason) })
     socket.on('player_left', () => { setStatus('error'); setErrorMsg('Un giocatore ha abbandonato') })
+    // Can't reach the server while trying to connect → surface it and stop retrying.
+    socket.on('connect_error', () => {
+      setStatus(s => (s === 'connecting' ? 'error' : s))
+      setErrorMsg('Server non raggiungibile. Riprova più tardi.')
+    })
 
     return () => {
       socket.off('connect'); socket.off('disconnect'); socket.off('assigned')
-      socket.off('lobby'); socket.off('state'); socket.off('join_error'); socket.off('player_left')
+      socket.off('lobby'); socket.off('state'); socket.off('join_error')
+      socket.off('player_left'); socket.off('connect_error')
     }
   }, [])
 

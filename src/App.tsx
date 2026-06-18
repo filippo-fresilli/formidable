@@ -20,6 +20,7 @@ import { ParamsModal } from './components/ParamsModal'
 import { StatsModal } from './components/StatsModal'
 import { OnlineModal } from './components/OnlineModal'
 import { PlayModal } from './components/PlayModal'
+import { LangModal } from './components/LangModal'
 import { ModalShell } from './components/ModalShell'
 import { TopBar } from './components/TopBar'
 import { ScoreCard } from './components/ScoreCard'
@@ -38,6 +39,8 @@ export default function App() {
     return { savedSettings, savedGame, isResume }
   })
   const { savedSettings, savedGame, isResume } = init
+  // No stored settings at all → first ever visit: ask for the language first.
+  const isFirstVisit = savedSettings === null
 
   // ── Settings state ────────────────────────────────────────────────────────
   const [lang, setLang]             = useState<Lang>(savedSettings?.lang ?? 'it')
@@ -52,7 +55,8 @@ export default function App() {
   const [showOnline, setShowOnline]               = useState(false)
   const [codeCopied, setCodeCopied]               = useState(false)
   const onlinePauseRef                            = useRef(false)
-  const [showOnboarding, setShowOnboarding]       = useState(!isResume)
+  const [showLangPicker, setShowLangPicker]       = useState(isFirstVisit)
+  const [showOnboarding, setShowOnboarding]       = useState(!isResume && !isFirstVisit)
   const [showParams, setShowParams]               = useState(false)
   const [showPlay, setShowPlay]                   = useState(false)
   const [showStats, setShowStats]                 = useState(false)
@@ -428,6 +432,14 @@ export default function App() {
             </button>
           </div>
         </ModalShell>
+      )}
+
+      {showLangPicker && (
+        <LangModal onPick={(l) => {
+          setLang(l)
+          setShowLangPicker(false)
+          setShowOnboarding(true)
+        }} />
       )}
 
       {showOnboarding && (

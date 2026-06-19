@@ -33,6 +33,9 @@ export interface I18nDict {
   shapeNamesShort: Record<'T' | 'Q' | 'C', string>
   colorNames: Record<'B' | 'R' | 'G', string>
   attrLabels: Record<'os' | 'oc' | 'is' | 'ic', string>
+  rulesTitle: string
+  outerLabel: string; innerLabel: string
+  outerLabelShort: string; innerLabelShort: string
   onboarding: { icon: string; title: string; text: string }[]
 }
 
@@ -75,6 +78,9 @@ export const I18N: Record<Lang, I18nDict> = {
     shapeNamesShort: { T: 'Triang.', Q: 'Quadr.', C: 'Cerch.' },
     colorNames: { B: 'Blu', R: 'Rosso', G: 'Verde' },
     attrLabels: { os: 'forma est.', oc: 'colore est.', is: 'forma int.', ic: 'colore int.' },
+    rulesTitle: 'Regole del gioco',
+    outerLabel: 'esterno', innerLabel: 'interno',
+    outerLabelShort: 'est.', innerLabelShort: 'int.',
     onboarding: [
       { icon: '🏆', title: 'Sei pronto a diventare FORMIDABILE?', text: 'Formidable è il gioco delle forme e dei colori. Sii il primo a raggiungere 50 punti completando file di carte con caratteristiche in comune. Strategia, conquiste e colpi di scena ti aspettano!' },
       { icon: '🎴', title: 'Le carte', text: 'Ogni carta ha 4 caratteristiche: forma esterna (triangolo, quadrato, cerchio), colore esterno (blu, rosso, verde), forma interna e colore interno. Lo sfondo è il colore esterno, la forma bianca è quella esterna, il simbolo colorato dentro è la forma interna.' },
@@ -119,6 +125,9 @@ export const I18N: Record<Lang, I18nDict> = {
     shapeNamesShort: { T: 'Triang.', Q: 'Square', C: 'Circle' },
     colorNames: { B: 'Blue', R: 'Red', G: 'Green' },
     attrLabels: { os: 'outer shape', oc: 'outer color', is: 'inner shape', ic: 'inner color' },
+    rulesTitle: 'Game rules',
+    outerLabel: 'outer', innerLabel: 'inner',
+    outerLabelShort: 'out.', innerLabelShort: 'inn.',
     onboarding: [
       { icon: '🏆', title: 'Are you ready to be FORMIDABLE?', text: 'Formidable is the game of shapes and colors. Be the first to reach 50 points by completing rows of cards sharing common traits. Strategy, conquests, and surprises await!' },
       { icon: '🎴', title: 'The cards', text: 'Each card has 4 traits: outer shape (triangle, square, circle), outer color (blue, red, green), inner shape, and inner color. The hex background is the outer color, the white shape is the outer shape, the colored symbol inside is the inner shape.' },
@@ -163,6 +172,9 @@ export const I18N: Record<Lang, I18nDict> = {
     shapeNamesShort: { T: 'Triang.', Q: 'Carré', C: 'Cercle' },
     colorNames: { B: 'Bleu', R: 'Rouge', G: 'Vert' },
     attrLabels: { os: 'forme ext.', oc: 'couleur ext.', is: 'forme int.', ic: 'couleur int.' },
+    rulesTitle: 'Règles du jeu',
+    outerLabel: 'ext.', innerLabel: 'int.',
+    outerLabelShort: 'ext.', innerLabelShort: 'int.',
     onboarding: [
       { icon: '🏆', title: 'Prêt à être FORMIDABLE ?', text: 'Formidable est le jeu des formes et des couleurs. Sois le premier à atteindre 50 points en complétant des rangées de cartes ayant des caractéristiques communes. Stratégie, conquêtes et surprises t\'attendent !' },
       { icon: '🎴', title: 'Les cartes', text: 'Chaque carte a 4 caractéristiques : forme extérieure (triangle, carré, cercle), couleur extérieure (bleu, rouge, vert), forme intérieure et couleur intérieure. Le fond hexagonal est la couleur extérieure, la forme blanche est la forme extérieure, le symbole coloré à l\'intérieur est la forme intérieure.' },

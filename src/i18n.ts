@@ -30,6 +30,7 @@ export interface I18nDict {
   statsPlayedShort: string; statsWinShort: string; statsBestStreak: string
   diffLabels: Record<'easy' | 'medium' | 'hard', string>
   shapeNames: Record<'T' | 'Q' | 'C', string>
+  shapeNamesShort: Record<'T' | 'Q' | 'C', string>
   colorNames: Record<'B' | 'R' | 'G', string>
   attrLabels: Record<'os' | 'oc' | 'is' | 'ic', string>
   onboarding: { icon: string; title: string; text: string }[]
@@ -71,6 +72,7 @@ export const I18N: Record<Lang, I18nDict> = {
     statsPlayedShort: 'Partite', statsWinShort: 'Vittorie', statsBestStreak: 'Record',
     diffLabels: { easy: '😌 Facile', medium: '🤔 Medio', hard: '🔥 Difficile' },
     shapeNames: { T: 'Triangolo', Q: 'Quadrato', C: 'Cerchio' },
+    shapeNamesShort: { T: 'Triang.', Q: 'Quadr.', C: 'Cerch.' },
     colorNames: { B: 'Blu', R: 'Rosso', G: 'Verde' },
     attrLabels: { os: 'forma est.', oc: 'colore est.', is: 'forma int.', ic: 'colore int.' },
     onboarding: [
@@ -114,6 +116,7 @@ export const I18N: Record<Lang, I18nDict> = {
     statsPlayedShort: 'Played', statsWinShort: 'Wins', statsBestStreak: 'Best',
     diffLabels: { easy: '😌 Easy', medium: '🤔 Medium', hard: '🔥 Hard' },
     shapeNames: { T: 'Triangle', Q: 'Square', C: 'Circle' },
+    shapeNamesShort: { T: 'Triang.', Q: 'Square', C: 'Circle' },
     colorNames: { B: 'Blue', R: 'Red', G: 'Green' },
     attrLabels: { os: 'outer shape', oc: 'outer color', is: 'inner shape', ic: 'inner color' },
     onboarding: [
@@ -157,6 +160,7 @@ export const I18N: Record<Lang, I18nDict> = {
     statsPlayedShort: 'Parties', statsWinShort: 'Victoires', statsBestStreak: 'Record',
     diffLabels: { easy: '😌 Facile', medium: '🤔 Moyen', hard: '🔥 Difficile' },
     shapeNames: { T: 'Triangle', Q: 'Carré', C: 'Cercle' },
+    shapeNamesShort: { T: 'Triang.', Q: 'Carré', C: 'Cercle' },
     colorNames: { B: 'Bleu', R: 'Rouge', G: 'Vert' },
     attrLabels: { os: 'forme ext.', oc: 'couleur ext.', is: 'forme int.', ic: 'couleur int.' },
     onboarding: [

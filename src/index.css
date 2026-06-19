@@ -175,19 +175,17 @@ button { -webkit-tap-highlight-color: transparent; }
   flex-shrink: 0; /* mobile: sized by content (scores + board) */
 }
 
-/* Board wrapper: fixed 50% screen height on mobile, fills column on desktop */
+/* Board wrapper: fixed 55% screen height on mobile, fills column on desktop.
+   The extra height leaves vertical slack so the corner chips clear the board. */
 .board-wrap {
-  flex: 0 0 50dvh;
+  flex: 0 0 55dvh;
   min-height: 0;
   min-width: 0;
-  position: relative; /* positioning context for desktop corner chips */
+  position: relative; /* positioning context for corner chips */
 }
 
-/* Opponent/player chips in the board corners — desktop only. */
-.corner-chips { display: none; }
-@media (min-width: 768px) {
-  .corner-chips { display: block; }
-}
+/* Opponent/player chips in the board corners (mobile + desktop). */
+.corner-chips { display: block; }
 
 /* Right sidebar: hand + actions + history */
 .sidebar {
@@ -244,17 +242,11 @@ button { -webkit-tap-highlight-color: transparent; }
   }
 }
 
-/* Scores: mobile shows in left col, desktop shows in sidebar */
-.scores-desktop { display: none; }
-.scores-mobile  { display: block; }
-
 /* Hand panel: mobile shows above board, desktop shows in sidebar */
 .hand-desktop { display: none; }
 .hand-mobile  { display: block; }
 
 @media (min-width: 768px) {
-  .scores-desktop { display: block; }
-  .scores-mobile  { display: none; }
   .hand-desktop   { display: block; }
   .hand-mobile    { display: none; }
 }

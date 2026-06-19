@@ -1,5 +1,5 @@
 import React from 'react'
-import { Volume2, VolumeX, Sun, Moon, MessageSquare } from 'lucide-react'
+import { Volume2, VolumeX, Sun, Moon, MessageSquare, RotateCcw } from 'lucide-react'
 import type { I18nDict, Lang } from '../i18n'
 import type { Difficulty } from '../game/ai'
 import type { Theme } from '../game/storage'
@@ -52,13 +52,14 @@ interface ParamsModalProps {
   setMuted: (m: boolean) => void
   theme: Theme
   setTheme: (th: Theme) => void
+  onRestart: () => void
   onClose: () => void
 }
 
 export function ParamsModal({
   t, lang, setLang, numPlayers, onSetPlayers,
   difficulty, setDifficulty, playerName, setPlayerName,
-  muted, setMuted, theme, setTheme, onClose,
+  muted, setMuted, theme, setTheme, onRestart, onClose,
 }: ParamsModalProps) {
   const sec = (label: string, child: React.ReactNode) => (
     <div style={{ marginBottom: 18 }}>
@@ -129,6 +130,14 @@ export function ParamsModal({
       <p style={{ fontSize: 11, color: 'var(--text-faint)', margin: '0 0 14px', lineHeight: 1.4 }}>
         {t.opponentsHint}
       </p>
+
+      {/* Apply opponents/difficulty by starting a fresh game */}
+      <button className="btn-primary" onClick={() => { onRestart(); onClose() }} style={{
+        width: '100%', padding: 11, borderRadius: 10, border: 'none',
+        background: 'var(--color-accent)', color: '#fff', cursor: 'pointer',
+        fontSize: 14, fontWeight: 700, fontFamily: 'inherit', marginBottom: 10,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+      }}><RotateCcw size={16} />{t.restart}</button>
 
       {/* Feedback link — opens the user's mail client (does not auto-send) */}
       <a

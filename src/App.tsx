@@ -477,6 +477,7 @@ export default function App() {
           playerName={playerName} setPlayerName={setPlayerName}
           muted={muted} setMuted={setMuted}
           theme={theme} setTheme={setTheme}
+          onRestart={() => { if (isOnline) stopOnline(); restart(numPlayers) }}
           onClose={() => setShowParams(false)}
         />
       )}

@@ -76,7 +76,7 @@ export function HandPanel({
           <div key={i} className="btn-card" onClick={() => onSelectCard(i)} style={{
             flex: 1, borderRadius: 'var(--radius-md)',
             border: `2px solid ${selIdx === i ? 'var(--color-primary)' : 'var(--border-default)'}`,
-            padding: isDesktop ? '12px 8px' : '10px 8px', cursor: 'pointer',
+            padding: isDesktop ? '12px 8px' : '8px 4px', cursor: 'pointer',
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
             background: selIdx === i ? 'var(--bg-card-hand-sel)' : 'var(--bg-card-hand)',
             opacity: phase !== 'place' || busy ? 0.4 : 1,
@@ -84,8 +84,8 @@ export function HandPanel({
           }}>
             <MiniHex card={c} size={hexSize} />
             <div style={{ fontSize: 'var(--font-sm)', lineHeight: 1.7, color: 'var(--text-card-hand)', textAlign: 'center' }}>
-              <div><span style={{ color: COLOR_HEX[c.oc] }}>■</span> {t.colorNames[c.oc]} {t.shapeNames[c.os]}</div>
-              <div><span style={{ color: COLOR_HEX[c.ic] }}>■</span> {t.colorNames[c.ic]} {t.shapeNames[c.is]}</div>
+              <div><span style={{ color: COLOR_HEX[c.oc] }}>■</span> {t.colorNames[c.oc]} {(isDesktop ? t.shapeNames : t.shapeNamesShort)[c.os]}</div>
+              <div><span style={{ color: COLOR_HEX[c.ic] }}>■</span> {t.colorNames[c.ic]} {(isDesktop ? t.shapeNames : t.shapeNamesShort)[c.is]}</div>
             </div>
           </div>
         )) : gameOver ? (

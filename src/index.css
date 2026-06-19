@@ -180,6 +180,13 @@ button { -webkit-tap-highlight-color: transparent; }
   flex: 0 0 50dvh;
   min-height: 0;
   min-width: 0;
+  position: relative; /* positioning context for desktop corner chips */
+}
+
+/* Opponent/player chips in the board corners — desktop only. */
+.corner-chips { display: none; }
+@media (min-width: 768px) {
+  .corner-chips { display: block; }
 }
 
 /* Right sidebar: hand + actions + history */

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { I18N, type Lang } from './i18n'
 import { makeGame } from './game/logic'
@@ -24,6 +24,7 @@ import { LangModal } from './components/LangModal'
 import { ModalShell } from './components/ModalShell'
 import { TopBar } from './components/TopBar'
 import { ScoreCard } from './components/ScoreCard'
+import { PlayerChip } from './components/PlayerChip'
 import { HandPanel } from './components/HandPanel'
 import { ActionsPanel } from './components/ActionsPanel'
 import { HistoryPanel } from './components/HistoryPanel'
@@ -286,6 +287,35 @@ export default function App() {
     </div>
   )
 
+  // ── Corner chips (desktop): all players, one per board corner ─────────────
+  // Index → corner: 0 (you) bottom-left, 1 top-left, 2 top-right, 3 bottom-right.
+  const CORNERS: CSSProperties[] = [
+    { bottom: 8, left: 8 },
+    { top: 8, left: 8 },
+    { top: 8, right: 8 },
+    { bottom: 8, right: 8 },
+  ]
+  const cornerChips = (
+    <div className="corner-chips" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+      {Array.from({ length: np }, (_, i) => {
+        const isActive = turn === i && !gameOver
+        const total    = tokens[i] + Object.values(meeples).filter((v) => v === i).length
+        return (
+          <div key={i} style={{ position: 'absolute', ...CORNERS[i] }}>
+            <PlayerChip
+              name={PL[i]}
+              color={playerColors[i]}
+              meepleTotal={total}
+              meeplesFilled={tokens[i]}
+              score={scores[i]}
+              isActive={isActive}
+            />
+          </div>
+        )
+      })}
+    </div>
+  )
+
   const handPanel = (
     <HandPanel
       isMyTurn={isMyTurn}
@@ -522,12 +552,12 @@ export default function App() {
               playerColors={playerColors} flash={flash}
               onPlace={placeCard} onWithdraw={playerWithdraw}
             />
+            {cornerChips}
           </div>
         </div>
 
         {/* Sidebar */}
         <div className="sidebar">
-          <div className="scores-desktop">{scoresRow}</div>
           <div className="hand-desktop">{handPanel}</div>
           <ActionsPanel
             gameOver={gameOver}

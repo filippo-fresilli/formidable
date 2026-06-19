@@ -17,6 +17,7 @@ interface BoardProps {
   placedPos: Pos | null
   playerColors: string[]
   flash: Flash | null
+  showBorder?: boolean
   onPlace: (q: number, r: number, conquer: boolean) => void
   onWithdraw: (q: number, r: number) => void
 }
@@ -33,7 +34,7 @@ function MeepleIcon({ cx, cy, size, fill }: { cx: number; cy: number; size: numb
 
 export function Board({
   board, meeples, conquered, phase, selIdx, hands, tokens,
-  gameOver, placedPos, playerColors, flash, onPlace, onWithdraw,
+  gameOver, placedPos, playerColors, flash, showBorder = true, onPlace, onWithdraw,
 }: BoardProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [size, setSize] = useState(400)
@@ -87,7 +88,7 @@ export function Board({
         height: '100%',
         background: 'var(--board-bg)',
         borderRadius: 12,
-        border: '2px solid var(--board-border)',
+        border: showBorder ? '2px solid var(--board-border)' : 'none',
         boxSizing: 'border-box',
         display: 'flex',
         alignItems: 'center',

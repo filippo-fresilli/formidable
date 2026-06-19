@@ -175,13 +175,17 @@ button { -webkit-tap-highlight-color: transparent; }
   flex-shrink: 0; /* mobile: sized by content (scores + board) */
 }
 
-/* Board wrapper: fixed 55% screen height on mobile, fills column on desktop.
-   The extra height leaves vertical slack so the corner chips clear the board. */
+/* Board wrapper: fixed height on mobile with padding so corner chips
+   don't overlap the board SVG; fills column on desktop. */
 .board-wrap {
-  flex: 0 0 55dvh;
+  flex: 0 0 65dvh;
   min-height: 0;
   min-width: 0;
   position: relative; /* positioning context for corner chips */
+  padding: 52px 0;    /* vertical clearance for top/bottom corner chips */
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
 }
 
 /* Opponent/player chips in the board corners (mobile + desktop). */
@@ -216,6 +220,9 @@ button { -webkit-tap-highlight-color: transparent; }
   .board-wrap {
     flex: 1;
   }
+
+  /* On desktop the board fills the column — Board SVG provides its own border. */
+  .board-wrap { padding: 0; background: none; border-radius: 0; border: none; }
 
   .sidebar {
     width: 475px;

@@ -23,7 +23,6 @@ import { PlayModal } from './components/PlayModal'
 import { LangModal } from './components/LangModal'
 import { ModalShell } from './components/ModalShell'
 import { TopBar } from './components/TopBar'
-import { ScoreCard } from './components/ScoreCard'
 import { PlayerChip } from './components/PlayerChip'
 import { HandPanel } from './components/HandPanel'
 import { ActionsPanel } from './components/ActionsPanel'
@@ -265,29 +264,7 @@ export default function App() {
 
   const myMeepleTotal  = tokens[0] + Object.values(meeples).filter((v) => v === 0).length
 
-  // ── Scores list (bots only — player 1 lives in HandPanel) ─────────────────
-  const scoresRow = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
-      {Array.from({ length: np }, (_, i) => {
-        if (i === 0) return null
-        const isActive     = turn === i && !gameOver
-        const total        = tokens[i] + Object.values(meeples).filter((v) => v === i).length
-        return (
-          <ScoreCard
-            key={i}
-            name={PL[i]}
-            color={playerColors[i]}
-            meepleTotal={total}
-            meeplesFilled={tokens[i]}
-            score={scores[i]}
-            isActive={isActive}
-          />
-        )
-      })}
-    </div>
-  )
-
-  // ── Corner chips (desktop): all players, one per board corner ─────────────
+  // ── Corner chips: all players, one per board corner ───────────────────────
   // Index → corner: 0 (you) bottom-left, 1 top-left, 2 top-right, 3 bottom-right.
   const CORNERS: CSSProperties[] = [
     { bottom: 8, left: 8 },
@@ -309,6 +286,8 @@ export default function App() {
               meeplesFilled={tokens[i]}
               score={scores[i]}
               isActive={isActive}
+              compact={!isDesktop}
+              align={i === 2 || i === 3 ? 'right' : 'left'}
             />
           </div>
         )
@@ -542,7 +521,6 @@ export default function App() {
 
         {/* Board column */}
         <div className="left-col">
-          <div className="scores-mobile">{scoresRow}</div>
           <div className="hand-mobile">{handPanel}</div>
           <div className="board-wrap">
             <Board

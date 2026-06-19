@@ -16,7 +16,7 @@ interface PlayerChipProps {
   align?: 'left' | 'right'
 }
 
-// Compact version of ScoreCard for the board corners. Two lines: name + meeples
+// Compact player badge for the board corners. Two lines: name + meeples
 // on top, score (n/50) below. Content hugs the corner's side.
 export function PlayerChip({ name, color, meepleTotal, meeplesFilled, score, isActive, compact = false, align = 'left' }: PlayerChipProps) {
   const shownScore = useCountUp(score)

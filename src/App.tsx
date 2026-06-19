@@ -272,6 +272,8 @@ export default function App() {
     { top: 8, right: 8 },
     { bottom: 8, right: 8 },
   ]
+
+  // Corner chips: absolute overlay at board corners (mobile + desktop).
   const cornerChips = (
     <div className="corner-chips" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
       {Array.from({ length: np }, (_, i) => {
@@ -528,6 +530,7 @@ export default function App() {
               phase={phase} selIdx={selIdx} hands={hands} tokens={tokens}
               gameOver={gameOver || busy} placedPos={placedPos}
               playerColors={playerColors} flash={flash}
+              showBorder={isDesktop}
               onPlace={placeCard} onWithdraw={playerWithdraw}
             />
             {cornerChips}

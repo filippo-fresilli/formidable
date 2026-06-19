@@ -5,6 +5,19 @@ import { COLOR_HEX } from '../game/constants'
 import type { I18nDict } from '../i18n'
 import type { Card } from '../game/types'
 
+function ShapeIcon({ shape, filled = true, size = 10 }: { shape: 'T' | 'Q' | 'C'; filled?: boolean; size?: number }) {
+  const c = 'var(--text-card-hand)'
+  const f = filled ? c : 'none'
+  const sw = filled ? 0 : 1.5
+  return (
+    <svg viewBox="0 0 10 10" width={size} height={size} style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}>
+      {shape === 'T' && <polygon points="5,1.5 9,9 1,9" fill={f} stroke={c} strokeWidth={sw} />}
+      {shape === 'Q' && <rect x="1.5" y="1.5" width="7" height="7" fill={f} stroke={c} strokeWidth={sw} />}
+      {shape === 'C' && <circle cx="5" cy="5" r="3.8" fill={f} stroke={c} strokeWidth={sw} />}
+    </svg>
+  )
+}
+
 interface HandPanelProps {
   isMyTurn: boolean
   handTitle: string
@@ -83,9 +96,17 @@ export function HandPanel({
             transition: 'all 0.15s',
           }}>
             <MiniHex card={c} size={hexSize} />
-            <div style={{ fontSize: 'var(--font-sm)', lineHeight: 1.7, color: 'var(--text-card-hand)', textAlign: 'center' }}>
-              <div><span style={{ color: COLOR_HEX[c.oc] }}>■</span> {t.colorNames[c.oc]} {(isDesktop ? t.shapeNames : t.shapeNamesShort)[c.os]}</div>
-              <div><span style={{ color: COLOR_HEX[c.ic] }}>■</span> {t.colorNames[c.ic]} {(isDesktop ? t.shapeNames : t.shapeNamesShort)[c.is]}</div>
+            <div style={{ fontSize: 'var(--font-sm)', lineHeight: 1.55, color: 'var(--text-card-hand)', textAlign: 'center' }}>
+              <div><span style={{ color: COLOR_HEX[c.oc] }}>■</span> {t.colorNames[c.oc]} {isDesktop ? t.outerLabel : t.outerLabelShort}</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+                <ShapeIcon shape={c.os} filled={false} size={isDesktop ? 11 : 9} />
+                {(isDesktop ? t.shapeNames : t.shapeNamesShort)[c.os]} {isDesktop ? t.outerLabel : t.outerLabelShort}
+              </div>
+              <div><span style={{ color: COLOR_HEX[c.ic] }}>■</span> {t.colorNames[c.ic]} {isDesktop ? t.innerLabel : t.innerLabelShort}</div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+                <ShapeIcon shape={c.is} filled={true} size={isDesktop ? 11 : 9} />
+                {(isDesktop ? t.shapeNames : t.shapeNamesShort)[c.is]} {isDesktop ? t.innerLabel : t.innerLabelShort}
+              </div>
             </div>
           </div>
         )) : gameOver ? (

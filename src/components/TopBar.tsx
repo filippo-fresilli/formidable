@@ -49,7 +49,8 @@ export function TopBar({
             }}>
               <Clock size={15} /> {formatTime(elapsed)}
             </span>
-            <button className="btn-icon" onClick={onToggleTimer} aria-label={timerActive ? 'Pause' : 'Play'} style={{
+            <button className="btn-icon" onClick={onToggleTimer}
+              aria-label={timerActive ? 'Pause' : 'Play'} title={timerActive ? 'Pause' : 'Play'} style={{
               background: 'none', border: 'none', cursor: 'pointer',
               padding: '0 4px',
               color: 'var(--text-secondary)', height: 44, display: 'flex', alignItems: 'center',
@@ -58,16 +59,16 @@ export function TopBar({
             </button>
           </div>
         )}
-        <button className="btn-nav" onClick={onOpenPlay} aria-label={t.playTitle} style={{ ...navBtn(true), gap: 6 }}>
+        <button className="btn-nav" onClick={onOpenPlay} aria-label={t.playTitle} title={t.playTitle} style={{ ...navBtn(true), gap: 6 }}>
           <Gamepad2 size={18} />{isDesktop && <span>{t.playTitle}</span>}
         </button>
-        <button className="btn-nav" onClick={onHelp} aria-label={t.params} style={navBtn(true)}>
+        <button className="btn-nav" onClick={onHelp} aria-label={t.rulesTitle} title={t.rulesTitle} style={navBtn(true)}>
           <HelpCircle size={18} />
         </button>
-        <button className="btn-nav" onClick={onOpenStats} aria-label={t.statsTitle} style={navBtn(true)}>
+        <button className="btn-nav" onClick={onOpenStats} aria-label={t.statsTitle} title={t.statsTitle} style={navBtn(true)}>
           <BarChart3 size={18} />
         </button>
-        <button className="btn-nav" onClick={onOpenSettings} aria-label={t.params} style={{ ...navBtn(true), gap: 6 }}>
+        <button className="btn-nav" onClick={onOpenSettings} aria-label={t.params} title={t.params} style={{ ...navBtn(true), gap: 6 }}>
           <Settings size={18} />{isDesktop && <span>{t.params}</span>}
         </button>
       </div>

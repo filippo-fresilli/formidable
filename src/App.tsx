@@ -9,11 +9,12 @@ import { recordDailyResult, dayNumber } from './game/daily'
 import { trackGameStarted, trackGameCompleted, trackOnlineRoomCreated, trackOnlineRoomJoined, trackOnlineCompleted, trackPwaInstalled } from './game/analytics'
 import { playSound } from './game/sounds'
 import { PLAYER_COLORS, PLAYER_COLORS_DARK } from './game/constants'
-import type { HistoryState } from './game/types'
+import type { HistoryState, Card } from './game/types'
 import { useGame } from './game/useGame'
 import { useOnlineGame } from './game/useOnlineGame'
 import { useMediaQuery } from './ui/useMediaQuery'
 import { Board } from './components/Board'
+import { MiniHex } from './components/HexCard'
 import { OnboardingModal } from './components/OnboardingModal'
 import { WinModal } from './components/WinModal'
 import { ParamsModal } from './components/ParamsModal'
@@ -27,6 +28,15 @@ import { PlayerChip } from './components/PlayerChip'
 import { HandPanel } from './components/HandPanel'
 import { ActionsPanel } from './components/ActionsPanel'
 import { HistoryPanel } from './components/HistoryPanel'
+
+// ── Rules section constants ───────────────────────────────────────────────────
+const SAMPLE_CARD: Card = { os: 'Q', oc: 'R', is: 'C', ic: 'B' }
+const SCORING_ROW: Card[] = [
+  { os: 'T', oc: 'G', is: 'C', ic: 'R' },
+  { os: 'Q', oc: 'G', is: 'T', ic: 'B' },
+  { os: 'C', oc: 'G', is: 'Q', ic: 'R' },
+  { os: 'T', oc: 'G', is: 'C', ic: 'B' },
+]
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -321,6 +331,7 @@ export default function App() {
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
+    <>
     <div className="app-root">
       {/* ── Online setup modal (create / join) ──────────────────────────── */}
       {showOnline && (
@@ -566,6 +577,53 @@ export default function App() {
         </div>
 
       </div>
+
     </div>
+
+    {/* ── Rules section (below the game, reachable by scrolling) ─────────── */}
+    <section className="rules-section">
+      <div className="rules-section__inner">
+        <h2 className="rules-section__title">{t.howToPlayTitle}</h2>
+        <div className="rules-steps">
+          {t.onboarding.map((step, i) => (
+            <div key={i} className={`rules-step${i % 2 === 1 ? ' rules-step--reverse' : ''}`}>
+              <div className="rules-step__visual">
+                {i === 1 ? (
+                  <MiniHex card={SAMPLE_CARD} size={120} />
+                ) : i === 3 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {SCORING_ROW.map((c, j) => <MiniHex key={j} card={c} size={56} />)}
+                    </div>
+                    <span style={{ fontSize: 22, fontWeight: 800, color: '#3DC35A' }}>+4 pt</span>
+                  </div>
+                ) : (
+                  <span className="rules-step__icon">{step.icon}</span>
+                )}
+              </div>
+              <div className="rules-step__text">
+                <div className="rules-step__num">{t.stepLabel} {i + 1}</div>
+                <h3 className="rules-step__title">{step.title}</h3>
+                <p className="rules-step__body">{step.text}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className="rules-section__credits">{t.credits}</p>
+        <div style={{ textAlign: 'center', marginTop: 24 }}>
+          <button
+            className="btn-ghost"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            style={{
+              padding: '8px 20px', borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-default)',
+              background: 'var(--bg-panel)', color: 'var(--text-secondary)',
+              cursor: 'pointer', fontSize: 'var(--font-sm)', fontFamily: 'inherit',
+            }}
+          >↑ {lang === 'it' ? 'Torna al gioco' : lang === 'fr' ? 'Retour au jeu' : 'Back to game'}</button>
+        </div>
+      </div>
+    </section>
+    </>
   )
 }

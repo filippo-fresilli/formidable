@@ -151,10 +151,147 @@ button { -webkit-tap-highlight-color: transparent; }
   display: flex;
   flex-direction: column;
   height: 100dvh;
-  overflow: hidden;
+  overflow: hidden; /* fallback */
+  overflow: clip;   /* doesn't create a scroll container — page scroll propagates to window */
   padding: 10px;
   gap: 10px;
   font-family: system-ui, sans-serif;
+}
+
+/* ── Rules section (below the game, visible on scroll) ──────────────────── */
+
+.rules-section {
+  background: var(--bg-panel-alt);
+  border-top: 1px solid var(--border-default);
+}
+
+.rules-section__inner {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px 20px 64px;
+  box-sizing: border-box;
+}
+
+.rules-section__title {
+  text-align: center;
+  font-size: var(--font-2xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 32px;
+}
+
+/* ── Alternating steps layout ───────────────────────────────────────────────── */
+
+.rules-steps {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* vertical connecting line */
+.rules-steps::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 48px;
+  bottom: 48px;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--border-default);
+}
+
+.rules-step {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  padding: 48px 0;
+  position: relative;
+}
+
+/* dot on the line at vertical center of each step */
+.rules-step::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--bg-panel-alt);
+  border: 3px solid var(--color-primary);
+  z-index: 1;
+}
+
+.rules-step--reverse {
+  flex-direction: row-reverse;
+}
+
+.rules-step__visual {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rules-step__icon {
+  font-size: 80px;
+  line-height: 1;
+}
+
+.rules-step__text {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.rules-step__num {
+  font-size: var(--font-xs);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--color-primary);
+  margin-bottom: 8px;
+}
+
+.rules-step__title {
+  font-size: var(--font-xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0 0 12px;
+}
+
+.rules-step__body {
+  font-size: var(--font-base);
+  color: var(--text-secondary);
+  line-height: 1.8;
+  white-space: pre-line;
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .rules-steps::before,
+  .rules-step::after { display: none; }
+
+  .rules-step,
+  .rules-step--reverse {
+    flex-direction: column;
+    gap: 24px;
+    padding: 32px 0;
+  }
+
+  .rules-step__visual,
+  .rules-step__text {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
+.rules-section__credits {
+  text-align: center;
+  font-size: var(--font-xs);
+  color: var(--text-muted);
+  margin: 32px 0 0;
 }
 
 /* Below the top bar: board + sidebar stack vertically on mobile */

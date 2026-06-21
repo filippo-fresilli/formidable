@@ -34,6 +34,8 @@ export interface I18nDict {
   colorNames: Record<'B' | 'R' | 'G', string>
   attrLabels: Record<'os' | 'oc' | 'is' | 'ic', string>
   rulesTitle: string
+  howToPlayTitle: string
+  stepLabel: string
   outerLabel: string; innerLabel: string
   outerLabelShort: string; innerLabelShort: string
   onboarding: { icon: string; title: string; text: string }[]
@@ -79,6 +81,8 @@ export const I18N: Record<Lang, I18nDict> = {
     colorNames: { B: 'Blu', R: 'Rosso', G: 'Verde' },
     attrLabels: { os: 'forma est.', oc: 'colore est.', is: 'forma int.', ic: 'colore int.' },
     rulesTitle: 'Regole del gioco',
+    howToPlayTitle: 'Come si gioca a Formidable?',
+    stepLabel: 'Passo',
     outerLabel: 'esterno', innerLabel: 'interno',
     outerLabelShort: 'est.', innerLabelShort: 'int.',
     onboarding: [
@@ -126,6 +130,8 @@ export const I18N: Record<Lang, I18nDict> = {
     colorNames: { B: 'Blue', R: 'Red', G: 'Green' },
     attrLabels: { os: 'outer shape', oc: 'outer color', is: 'inner shape', ic: 'inner color' },
     rulesTitle: 'Game rules',
+    howToPlayTitle: 'How to play Formidable?',
+    stepLabel: 'Step',
     outerLabel: 'outer', innerLabel: 'inner',
     outerLabelShort: 'out.', innerLabelShort: 'inn.',
     onboarding: [
@@ -173,6 +179,8 @@ export const I18N: Record<Lang, I18nDict> = {
     colorNames: { B: 'Bleu', R: 'Rouge', G: 'Vert' },
     attrLabels: { os: 'forme ext.', oc: 'couleur ext.', is: 'forme int.', ic: 'couleur int.' },
     rulesTitle: 'Règles du jeu',
+    howToPlayTitle: 'Comment jouer à Formidable ?',
+    stepLabel: 'Étape',
     outerLabel: 'ext.', innerLabel: 'int.',
     outerLabelShort: 'ext.', innerLabelShort: 'int.',
     onboarding: [

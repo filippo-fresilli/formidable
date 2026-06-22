@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { I18N, type Lang } from './i18n'
-import { makeGame } from './game/logic'
+import { makeGame, hexPoints } from './game/logic'
 import { type Difficulty } from './game/ai'
 import { saveGame, loadSave, clearSave, saveSettings, loadSettings, type Theme } from './game/storage'
 import { recordGameResult } from './game/stats'
 import { recordDailyResult, dayNumber } from './game/daily'
 import { trackGameStarted, trackGameCompleted, trackOnlineRoomCreated, trackOnlineRoomJoined, trackOnlineCompleted, trackPwaInstalled } from './game/analytics'
 import { playSound } from './game/sounds'
-import { PLAYER_COLORS, PLAYER_COLORS_DARK } from './game/constants'
+import { PLAYER_COLORS, PLAYER_COLORS_DARK, COLOR_HEX, COLOR_STROKE } from './game/constants'
 import type { HistoryState, Card } from './game/types'
 import { useGame } from './game/useGame'
 import { useOnlineGame } from './game/useOnlineGame'
 import { useMediaQuery } from './ui/useMediaQuery'
 import { Board } from './components/Board'
-import { MiniHex } from './components/HexCard'
+import { MEEPLE_PATH } from './components/MeepleIcon'
+import { MiniHex, OuterShape, InnerShape } from './components/HexCard'
 import { OnboardingModal } from './components/OnboardingModal'
 import { WinModal } from './components/WinModal'
 import { ParamsModal } from './components/ParamsModal'
@@ -45,6 +46,156 @@ const SCORING_ROW_2: Card[] = [
   { os: 'T', oc: 'G', is: 'C', ic: 'R' },
   { os: 'T', oc: 'G', is: 'Q', ic: 'B' },
 ]
+
+// "Conquista e brucia" example, drawn with the real board's rendering primitives.
+// A play area with 8 cards on two crossing axes — a green colour-line and a
+// triangle shape-line — meeting at one unguarded opponent card worth +8.
+// The player's matching card slides in, overwrites it (conquest), and a meeple
+// is placed in the corner, exactly as in a real game.
+//   Phase 0: board shown, intersection highlighted as conquerable (+8).
+//   Phase 1: player's card slides over the intersection and stacks.
+//   Phase 2: the player's meeple pops onto the conquered card.
+function ConquestAnimation() {
+  const [phase, setPhase] = useState<0 | 1 | 2>(0)
+
+  useEffect(() => {
+    let t1: ReturnType<typeof setTimeout>, t2: ReturnType<typeof setTimeout>, t3: ReturnType<typeof setTimeout>
+    const cycle = () => {
+      setPhase(0)
+      t1 = setTimeout(() => setPhase(1), 1800)   // card slides in
+      t2 = setTimeout(() => setPhase(2), 2450)   // meeple pops
+      t3 = setTimeout(cycle, 4500)               // hold, then loop
+    }
+    cycle()
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
+  }, [])
+
+  const SQ3 = 1.7320508
+  const hr = 29
+  const ox = 150, oy = 110
+  const toXY = (q: number, r: number) => ({ x: ox + hr * SQ3 * (q + r / 2), y: oy + hr * 1.5 * r })
+
+  const inset = hr * 0.78
+  const sw = hr * 0.08
+
+  const drawCard = (card: Card, x: number, y: number) => (
+    <>
+      <polygon points={hexPoints(x, y, hr - 0.5)} style={{ fill: COLOR_HEX[card.oc], stroke: 'var(--board-card-stroke)', strokeWidth: 0.6 }} />
+      <OuterShape shape={card.os} cx={x} cy={y} inset={inset} fill="white" stroke={COLOR_STROKE[card.oc]} strokeWidth={sw} />
+      <InnerShape shape={card.is} cx={x} cy={y} inset={inset} fill={COLOR_HEX[card.ic]} stroke={COLOR_STROKE[card.ic]} strokeWidth={sw} />
+    </>
+  )
+
+  const drawMeeple = (x: number, y: number, fill: string) => {
+    const size = hr * 0.65, f = size / 16
+    return (
+      <g transform={`translate(${x + hr * 0.44 - 8 * f}, ${y - hr * 0.42 - 8 * f}) scale(${f})`}>
+        <path d={MEEPLE_PATH} fill={fill} stroke="white" strokeWidth={0.8 / f}
+          style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
+      </g>
+    )
+  }
+
+  const ME = PLAYER_COLORS[0], OPP = PLAYER_COLORS[1]
+
+  // 8 cards on two axes. Horizontal axis = all green (oc=G); the (-2,0) red card
+  // is extra board context. Vertical axis = all triangles (os=T). They cross at
+  // (0,0). Withdrawing a meeple there scores the green-4 + triangle-4 = +8.
+  const cards: { q: number; r: number; card: Card; meeple?: string }[] = [
+    { q: -2, r: 0, card: { os: 'Q', oc: 'R', is: 'T', ic: 'G' } },
+    { q: -1, r: 0, card: { os: 'C', oc: 'G', is: 'Q', ic: 'R' }, meeple: ME },
+    { q:  1, r: 0, card: { os: 'Q', oc: 'G', is: 'C', ic: 'B' } },
+    { q:  2, r: 0, card: { os: 'C', oc: 'G', is: 'T', ic: 'B' } },
+    { q:  0, r: -1, card: { os: 'T', oc: 'B', is: 'C', ic: 'G' } },
+    { q:  0, r: 1, card: { os: 'T', oc: 'R', is: 'Q', ic: 'B' } },
+    { q:  0, r: 2, card: { os: 'T', oc: 'B', is: 'C', ic: 'R' }, meeple: OPP },
+  ]
+  // Intersection: opponent's unguarded green triangle (8th card).
+  const oppIntersection: Card = { os: 'T', oc: 'G', is: 'Q', ic: 'R' }
+  // Player's card: same outer shape + outer colour (2 shared traits → can conquer).
+  const myCard: Card = { os: 'T', oc: 'G', is: 'C', ic: 'B' }
+
+  const tgt = toXY(0, 0)
+  const startX = 250, startY = 40   // hovering top-right, like a card in hand
+
+  const W = 300, H = 275
+
+  // Empty board cells around the cluster, for "plancia" context.
+  const occupied = new Set(cards.map((c) => `${c.q},${c.r}`).concat('0,0'))
+  const empties: { x: number; y: number; key: string }[] = []
+  for (let q = -3; q <= 3; q++) for (let r = -3; r <= 4; r++) {
+    if (occupied.has(`${q},${r}`)) continue
+    const { x, y } = toXY(q, r)
+    if (x > 18 && x < W - 18 && y > 16 && y < H - 16) empties.push({ x, y, key: `${q},${r}` })
+  }
+
+  return (
+    <div style={{
+      background: 'var(--board-bg)', border: '2px solid var(--board-border)',
+      borderRadius: 12, padding: 6, width: '100%', maxWidth: 320,
+    }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
+        {/* Empty board cells */}
+        {empties.map(({ x, y, key }) => (
+          <polygon key={`e${key}`} points={hexPoints(x, y, hr - 0.5)}
+            style={{ fill: 'var(--board-empty-fill)', stroke: 'var(--board-empty-stroke)', strokeWidth: 0.6 }} />
+        ))}
+
+        {/* Soft shadows under placed cards */}
+        {cards.map(({ q, r }) => {
+          const { x, y } = toXY(q, r)
+          return <polygon key={`s${q},${r}`} points={hexPoints(x, y, hr - 0.5)} fill="#00000022" />
+        })}
+
+        {/* The 8 static cards (two axes) */}
+        {cards.map(({ q, r, card, meeple }) => {
+          const { x, y } = toXY(q, r)
+          return <g key={`c${q},${r}`}>{drawCard(card, x, y)}{meeple && drawMeeple(x, y, meeple)}</g>
+        })}
+
+        {/* Intersection — opponent's unguarded card, highlighted as conquerable */}
+        <g>
+          <polygon points={hexPoints(tgt.x, tgt.y, hr - 0.5)}
+            style={{ fill: 'var(--conquer-fill)', stroke: 'var(--conquer-stroke)', strokeWidth: 2 }} />
+          <OuterShape shape={oppIntersection.os} cx={tgt.x} cy={tgt.y} inset={inset} fill="white" stroke={COLOR_STROKE[oppIntersection.oc]} strokeWidth={sw} />
+          <InnerShape shape={oppIntersection.is} cx={tgt.x} cy={tgt.y} inset={inset} fill={COLOR_HEX[oppIntersection.ic]} stroke={COLOR_STROKE[oppIntersection.ic]} strokeWidth={sw} />
+        </g>
+
+        {/* Player's card — slides in and stacks on top (conquest), then meeple */}
+        <g style={{
+          transform: phase === 0 ? `translate(${startX - tgt.x}px, ${startY - tgt.y}px)` : 'translate(0px, -4px)',
+          transition: phase === 0 ? 'none' : 'transform 0.6s cubic-bezier(0.34,1.3,0.64,1)',
+          filter: phase >= 1 ? 'drop-shadow(0 4px 0 var(--stack-shadow))' : 'none',
+        }}>
+          {drawCard(myCard, tgt.x, tgt.y)}
+          <g style={{
+            transformBox: 'fill-box', transformOrigin: 'center',
+            transform: phase === 2 ? 'scale(1)' : 'scale(0)',
+            transition: phase === 2 ? 'transform 0.3s cubic-bezier(0.34,1.56,0.64,1)' : 'none',
+          }}>
+            {drawMeeple(tgt.x, tgt.y, ME)}
+          </g>
+        </g>
+
+        {/* +8 score badge on the intersection (same style as the real board) */}
+        {(() => {
+          const label = '+8'
+          const w = hr * (0.42 + 0.24 * label.length)
+          const h = hr * 0.5
+          const by = tgt.y - hr * 0.98
+          return (
+            <g style={{ pointerEvents: 'none' }}>
+              <rect x={tgt.x - w / 2} y={by - h / 2} width={w} height={h} rx={h / 2}
+                fill="#10161f" opacity={0.9} stroke="#fff" strokeWidth={0.7} />
+              <text x={tgt.x} y={by} textAnchor="middle" dominantBaseline="central"
+                fill="#fff" fontWeight={800} fontSize={hr * 0.4} fontFamily="system-ui, sans-serif">{label}</text>
+            </g>
+          )
+        })()}
+      </svg>
+    </div>
+  )
+}
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -615,6 +766,8 @@ export default function App() {
                       </div>
                     </div>
                   </div>
+                ) : i === 4 ? (
+                  <ConquestAnimation />
                 ) : (
                   <span className="rules-step__icon">{step.icon}</span>
                 )}

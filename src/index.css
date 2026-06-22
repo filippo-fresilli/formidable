@@ -298,14 +298,25 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 
 @media (max-width: 560px) {
-  .rules-steps::before,
-  .rules-step::after { display: none; }
+  /* Timeline moves to the left edge; steps stack vertically to its right. */
+  .rules-steps::before {
+    left: 11px;
+    transform: none;
+    top: 32px;
+    bottom: 32px;
+  }
+
+  .rules-step::after {
+    left: 12px;
+    top: 44px;                 /* near the top of each step, by its heading */
+    transform: translate(-50%, 0);
+  }
 
   .rules-step,
   .rules-step--reverse {
     flex-direction: column;
     gap: 24px;
-    padding: 32px 0;
+    padding: 32px 0 32px 38px;  /* left gutter for the timeline */
   }
 
   .rules-step__visual,
@@ -313,6 +324,9 @@ button { -webkit-tap-highlight-color: transparent; }
     flex: 0 0 auto;
     width: 100%;
   }
+
+  /* Text comes before the image/animation when stacked */
+  .rules-step__text { order: -1; }
 }
 
 .rules-section__credits {

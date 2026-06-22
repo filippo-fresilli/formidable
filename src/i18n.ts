@@ -38,6 +38,8 @@ export interface I18nDict {
   rulesTitle: string
   howToPlayTitle: string
   stepLabel: string
+  benefitsTitle: string
+  benefits: { icon: string; title: string; text: string }[]
   outerLabel: string; innerLabel: string
   outerLabelShort: string; innerLabelShort: string
   onboarding: { icon: string; title: string; text: string }[]
@@ -87,6 +89,15 @@ export const I18N: Record<Lang, I18nDict> = {
     rulesTitle: 'Regole del gioco',
     howToPlayTitle: 'Come si gioca a Formidable?',
     stepLabel: 'Passo',
+    benefitsTitle: 'Vantaggi del gioco Formidable',
+    benefits: [
+      { icon: '🧩', title: 'Allena il pensiero logico', text: 'Riconoscere pattern su 4 attributi simultaneamente potenzia la capacità di analisi e ragionamento.' },
+      { icon: '♟️', title: 'Strategia e adattamento', text: 'Ogni mossa dell\'avversario cambia il campo di gioco. Devi pensare in anticipo e adattare il piano.' },
+      { icon: '⚡', title: 'Veloce da imparare', text: 'Regole semplici in pochi minuti, ma la profondità strategica ti terrà impegnato per ore.' },
+      { icon: '📱', title: 'Giocabile ovunque', text: 'App progressiva, funziona offline su qualsiasi dispositivo. Basta un browser, niente da installare.' },
+      { icon: '🎯', title: 'Sfida mentale', text: 'Calcola combinazioni, prevedi le mosse avversarie e massimizza il punteggio ad ogni turno.' },
+      { icon: '⚔️', title: 'Competitivo e avvincente', text: 'Conquiste, bruciature e colpi di scena rendono ogni partita unica e mai scontata.' },
+    ],
     outerLabel: 'esterno', innerLabel: 'interno',
     outerLabelShort: 'est.', innerLabelShort: 'int.',
     onboarding: [
@@ -138,6 +149,15 @@ export const I18N: Record<Lang, I18nDict> = {
     rulesTitle: 'Game rules',
     howToPlayTitle: 'How to play Formidable?',
     stepLabel: 'Step',
+    benefitsTitle: 'Benefits of playing Formidable',
+    benefits: [
+      { icon: '🧩', title: 'Trains logical thinking', text: 'Recognising patterns across 4 simultaneous attributes sharpens your analytical and reasoning skills.' },
+      { icon: '♟️', title: 'Strategy & adaptation', text: 'Every opponent move reshapes the board. You must think ahead and continuously adjust your plan.' },
+      { icon: '⚡', title: 'Easy to learn', text: 'Simple rules learned in minutes, yet the strategic depth will keep you engaged for hours.' },
+      { icon: '📱', title: 'Play anywhere', text: 'A progressive web app that works offline on any device. Just open a browser — nothing to install.' },
+      { icon: '🎯', title: 'Mental challenge', text: 'Calculate combinations, predict opponent moves, and maximise your score every single turn.' },
+      { icon: '⚔️', title: 'Competitive & thrilling', text: 'Conquests, burns, and unexpected twists make every game unique and never predictable.' },
+    ],
     outerLabel: 'outer', innerLabel: 'inner',
     outerLabelShort: 'out.', innerLabelShort: 'inn.',
     onboarding: [
@@ -189,6 +209,15 @@ export const I18N: Record<Lang, I18nDict> = {
     rulesTitle: 'Règles du jeu',
     howToPlayTitle: 'Comment jouer à Formidable ?',
     stepLabel: 'Étape',
+    benefitsTitle: 'Avantages de jouer à Formidable',
+    benefits: [
+      { icon: '🧩', title: 'Entraîne la pensée logique', text: 'Reconnaître des schémas sur 4 attributs simultanés renforce les capacités d\'analyse et de raisonnement.' },
+      { icon: '♟️', title: 'Stratégie et adaptation', text: 'Chaque coup adverse modifie le plateau. Tu dois anticiper et ajuster ton plan en permanence.' },
+      { icon: '⚡', title: 'Facile à apprendre', text: 'Des règles simples apprises en quelques minutes, mais une profondeur stratégique qui captive pendant des heures.' },
+      { icon: '📱', title: 'Jouable partout', text: 'Une application web progressive qui fonctionne hors ligne sur n\'importe quel appareil. Juste un navigateur, rien à installer.' },
+      { icon: '🎯', title: 'Défi mental', text: 'Calcule les combinaisons, anticipe les coups adverses et maximise ton score à chaque tour.' },
+      { icon: '⚔️', title: 'Compétitif et palpitant', text: 'Conquêtes, brûlures et retournements de situation rendent chaque partie unique et imprévisible.' },
+    ],
     outerLabel: 'ext.', innerLabel: 'int.',
     outerLabelShort: 'ext.', innerLabelShort: 'int.',
     onboarding: [

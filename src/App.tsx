@@ -291,6 +291,31 @@ function ConquestAnimation({ t }: { t: I18nDict }) {
   )
 }
 
+function BenefitsGrid({ t }: { t: I18nDict }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const el = ref.current; if (!el) return
+    if (typeof IntersectionObserver === 'undefined') { setVisible(true); return }
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); io.disconnect() }
+    }, { threshold: 0.1 })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return (
+    <div className={`benefits-grid${visible ? ' is-visible' : ''}`} ref={ref}>
+      {t.benefits.map((b, i) => (
+        <div key={i} className="benefit-card" style={{ transitionDelay: `${i * 70}ms` }}>
+          <div className="benefit-card__icon">{b.icon}</div>
+          <h3 className="benefit-card__title">{b.title}</h3>
+          <p className="benefit-card__text">{b.text}</p>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 // ── App ───────────────────────────────────────────────────────────────────────
 
 export default function App() {
@@ -873,6 +898,10 @@ export default function App() {
               </div>
             </RulesStep>
           ))}
+        </div>
+        <div className="benefits-section">
+          <h2 className="benefits-section__title">{t.benefitsTitle}</h2>
+          <BenefitsGrid t={t} />
         </div>
         <p className="rules-section__credits">{t.credits}</p>
         <div style={{ textAlign: 'center', marginTop: 24 }}>

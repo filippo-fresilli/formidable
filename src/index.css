@@ -158,6 +158,17 @@ button { -webkit-tap-highlight-color: transparent; }
   font-family: system-ui, sans-serif;
 }
 
+/* Mobile: the game view grows with its content and the whole page is a single
+   scroll. Without this, .main-area scrolled internally, giving a second nested
+   scrollbar on top of the page scroll. */
+@media (max-width: 767px) {
+  .app-root {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+}
+
 /* ── Rules section (below the game, visible on scroll) ──────────────────── */
 
 .rules-section {
@@ -311,14 +322,15 @@ button { -webkit-tap-highlight-color: transparent; }
   margin: 32px 0 0;
 }
 
-/* Below the top bar: board + sidebar stack vertically on mobile */
+/* Below the top bar: board + sidebar stack vertically on mobile.
+   No inner scroll on mobile — the whole page scrolls as one (see .app-root). */
 .main-area {
   display: flex;
-  flex: 1;
+  flex: 0 0 auto;
   min-height: 0;
   gap: 10px;
   flex-direction: column;
-  overflow-y: auto;
+  overflow-y: visible;
 }
 
 /* Left column: scores + board */
@@ -364,6 +376,7 @@ button { -webkit-tap-highlight-color: transparent; }
 
 @media (min-width: 768px) {
   .main-area {
+    flex: 1;
     flex-direction: row;
     overflow-y: hidden;
   }

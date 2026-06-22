@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type CSSProperties } from 'react'
+import { useState, useEffect, useRef, type CSSProperties, type ReactNode } from 'react'
 import { Copy, Check } from 'lucide-react'
 import { I18N, type Lang, type I18nDict } from './i18n'
 import { makeGame, hexPoints } from './game/logic'
@@ -46,6 +46,29 @@ const SCORING_ROW_2: Card[] = [
   { os: 'T', oc: 'G', is: 'C', ic: 'R' },
   { os: 'T', oc: 'G', is: 'Q', ic: 'B' },
 ]
+
+// Wraps a how-to-play step and reveals it with a fade + slide as it scrolls
+// into view. Visibility is tracked in React state so the class survives
+// re-renders (e.g. on language change).
+function RulesStep({ reverse, children }: { reverse: boolean; children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    if (typeof IntersectionObserver === 'undefined') { setVisible(true); return }
+    const io = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setVisible(true); io.disconnect() }
+    }, { threshold: 0.15, rootMargin: '0px 0px -10% 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  return (
+    <div ref={ref} className={`rules-step${reverse ? ' rules-step--reverse' : ''}${visible ? ' is-visible' : ''}`}>
+      {children}
+    </div>
+  )
+}
 
 // Annotated sample card for the "Le carte" step: a leader line from each of the
 // four corners, drawn on top of the card so it reaches the trait it names
@@ -803,7 +826,7 @@ export default function App() {
         <h2 className="rules-section__title">{t.howToPlayTitle}</h2>
         <div className="rules-steps">
           {t.onboarding.map((step, i) => (
-            <div key={i} className={`rules-step${i % 2 === 1 ? ' rules-step--reverse' : ''}`}>
+            <RulesStep key={i} reverse={i % 2 === 1}>
               <div className="rules-step__visual">
                 {i === 1 ? (
                   <CardAnatomy t={t} />
@@ -835,7 +858,7 @@ export default function App() {
                 <h3 className="rules-step__title">{step.title}</h3>
                 <p className="rules-step__body">{step.text}</p>
               </div>
-            </div>
+            </RulesStep>
           ))}
         </div>
         <p className="rules-section__credits">{t.credits}</p>

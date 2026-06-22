@@ -136,7 +136,7 @@ function CardAnatomy({ t }: { t: I18nDict }) {
 //   Phase 0: board shown, intersection highlighted as conquerable (+8).
 //   Phase 1: player's card slides over the intersection and stacks.
 //   Phase 2: the player's meeple pops onto the conquered card.
-function ConquestAnimation() {
+function ConquestAnimation({ t }: { t: I18nDict }) {
   const [phase, setPhase] = useState<0 | 1 | 2>(0)
 
   useEffect(() => {
@@ -212,8 +212,12 @@ function ConquestAnimation() {
 
   return (
     <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      gap: 12, width: '100%', maxWidth: 320,
+    }}>
+    <div style={{
       background: 'var(--board-bg)', border: '2px solid var(--board-border)',
-      borderRadius: 12, padding: 6, width: '100%', maxWidth: 320,
+      borderRadius: 12, padding: 6, width: '100%',
     }}>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
         {/* Empty board cells */}
@@ -274,6 +278,15 @@ function ConquestAnimation() {
           )
         })()}
       </svg>
+    </div>
+
+    {/* Legend: the red card highlight means "2 shared traits → conquerable" */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+      <svg width={22} height={22} viewBox="0 0 22 22" style={{ flexShrink: 0 }}>
+        <polygon points={hexPoints(11, 11, 9.5)} fill="var(--conquer-fill)" stroke="var(--conquer-stroke)" strokeWidth={2} />
+      </svg>
+      <span>{t.conquerLegend}</span>
+    </div>
     </div>
   )
 }
@@ -848,7 +861,7 @@ export default function App() {
                     </div>
                   </div>
                 ) : i === 4 ? (
-                  <ConquestAnimation />
+                  <ConquestAnimation t={t} />
                 ) : (
                   <span className="rules-step__icon">{step.icon}</span>
                 )}

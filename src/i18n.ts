@@ -34,6 +34,7 @@ export interface I18nDict {
   colorNames: Record<'B' | 'R' | 'G', string>
   attrLabels: Record<'os' | 'oc' | 'is' | 'ic', string>
   attrLabelsFull: Record<'os' | 'oc' | 'is' | 'ic', string>
+  conquerLegend: string
   rulesTitle: string
   howToPlayTitle: string
   stepLabel: string
@@ -82,6 +83,7 @@ export const I18N: Record<Lang, I18nDict> = {
     colorNames: { B: 'Blu', R: 'Rosso', G: 'Verde' },
     attrLabels: { os: 'forma est.', oc: 'colore est.', is: 'forma int.', ic: 'colore int.' },
     attrLabelsFull: { os: 'forma esterna', oc: 'colore esterno', is: 'forma interna', ic: 'colore interno' },
+    conquerLegend: 'Bordo rosso = la carta ha 2 caratteristiche in comune, quindi è conquistabile',
     rulesTitle: 'Regole del gioco',
     howToPlayTitle: 'Come si gioca a Formidable?',
     stepLabel: 'Passo',
@@ -132,6 +134,7 @@ export const I18N: Record<Lang, I18nDict> = {
     colorNames: { B: 'Blue', R: 'Red', G: 'Green' },
     attrLabels: { os: 'outer shape', oc: 'outer color', is: 'inner shape', ic: 'inner color' },
     attrLabelsFull: { os: 'outer shape', oc: 'outer color', is: 'inner shape', ic: 'inner color' },
+    conquerLegend: 'Red border = the card shares 2 traits, so it can be conquered',
     rulesTitle: 'Game rules',
     howToPlayTitle: 'How to play Formidable?',
     stepLabel: 'Step',
@@ -182,6 +185,7 @@ export const I18N: Record<Lang, I18nDict> = {
     colorNames: { B: 'Bleu', R: 'Rouge', G: 'Vert' },
     attrLabels: { os: 'forme ext.', oc: 'couleur ext.', is: 'forme int.', ic: 'couleur int.' },
     attrLabelsFull: { os: 'forme extérieure', oc: 'couleur extérieure', is: 'forme intérieure', ic: 'couleur intérieure' },
+    conquerLegend: 'Bordure rouge = la carte a 2 caractéristiques en commun, donc conquérable',
     rulesTitle: 'Règles du jeu',
     howToPlayTitle: 'Comment jouer à Formidable ?',
     stepLabel: 'Étape',

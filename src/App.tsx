@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import { Copy, Check } from 'lucide-react'
-import { I18N, type Lang } from './i18n'
+import { I18N, type Lang, type I18nDict } from './i18n'
 import { makeGame, hexPoints } from './game/logic'
 import { type Difficulty } from './game/ai'
 import { saveGame, loadSave, clearSave, saveSettings, loadSettings, type Theme } from './game/storage'
@@ -46,6 +46,64 @@ const SCORING_ROW_2: Card[] = [
   { os: 'T', oc: 'G', is: 'C', ic: 'R' },
   { os: 'T', oc: 'G', is: 'Q', ic: 'B' },
 ]
+
+// Annotated sample card for the "Le carte" step: a leader line from each of the
+// four corners, drawn on top of the card so it reaches the trait it names
+// (inner shape, inner colour, outer shape) and labels its value, e.g.
+// "colore esterno / Rosso".
+function CardAnatomy({ t }: { t: I18nDict }) {
+  const cx = 190, cy = 150, r = 52, inset = r * 0.78
+  const sw = r * 0.05
+  const card = SAMPLE_CARD
+
+  type Ann = {
+    attr: 'os' | 'oc' | 'is' | 'ic'
+    value: string
+    valueColor: string | null
+    ax: number; ay: number   // anchor point on the card (where the line points)
+    lx: number; ly: number   // line endpoint near the label
+    tx: number; ty: number   // label centre x, first line baseline
+  }
+  const anns: Ann[] = [
+    // top-left → outer colour (the hexagon background)
+    { attr: 'oc', value: t.colorNames[card.oc], valueColor: COLOR_HEX[card.oc],
+      ax: cx - 45, ay: cy - 26, lx: 78, ly: 58, tx: 78, ty: 34 },
+    // top-right → outer shape (the white shape)
+    { attr: 'os', value: t.shapeNames[card.os], valueColor: null,
+      ax: cx + 25, ay: cy - 25, lx: 302, ly: 58, tx: 302, ty: 34 },
+    // bottom-left → inner shape (the centre symbol)
+    { attr: 'is', value: t.shapeNames[card.is], valueColor: null,
+      ax: cx - 13, ay: cy, lx: 78, ly: 248, tx: 78, ty: 256 },
+    // bottom-right → inner colour (the symbol's fill)
+    { attr: 'ic', value: t.colorNames[card.ic], valueColor: COLOR_HEX[card.ic],
+      ax: cx + 13, ay: cy, lx: 302, ly: 248, tx: 302, ty: 256 },
+  ]
+
+  return (
+    <svg viewBox="0 0 380 300" width="100%" style={{ display: 'block', maxWidth: 380 }}>
+      {/* the card — same primitives as the real board */}
+      <polygon points={hexPoints(cx, cy, r)} fill={COLOR_HEX[card.oc]} stroke={COLOR_STROKE[card.oc]} strokeWidth={sw} />
+      <OuterShape shape={card.os} cx={cx} cy={cy} inset={inset} fill="white" stroke={COLOR_STROKE[card.oc]} strokeWidth={sw} />
+      <InnerShape shape={card.is} cx={cx} cy={cy} inset={inset} fill={COLOR_HEX[card.ic]} stroke={COLOR_STROKE[card.ic]} strokeWidth={sw} />
+
+      {/* leader lines + anchor dots — drawn ON TOP so they reach into the card */}
+      {anns.map((a) => (
+        <g key={`g${a.attr}`}>
+          <line x1={a.lx} y1={a.ly} x2={a.ax} y2={a.ay} stroke="var(--text-secondary)" strokeWidth={1.5} />
+          <circle cx={a.ax} cy={a.ay} r={3.6} fill={a.valueColor ?? '#ffffff'} stroke={a.valueColor ? '#ffffff' : 'var(--text-secondary)'} strokeWidth={1.4} />
+        </g>
+      ))}
+
+      {/* labels: attribute name + value */}
+      {anns.map((a) => (
+        <text key={`l${a.attr}`} x={a.tx} y={a.ty} textAnchor="middle" fontFamily="system-ui, sans-serif">
+          <tspan x={a.tx} fontSize={12.5} fontWeight={700} fill="var(--text-primary)">{t.attrLabelsFull[a.attr]}</tspan>
+          <tspan x={a.tx} dy={16} fontSize={12.5} fontWeight={800} fill={a.valueColor ?? 'var(--text-secondary)'}>{a.value}</tspan>
+        </text>
+      ))}
+    </svg>
+  )
+}
 
 // "Conquista e brucia" example, drawn with the real board's rendering primitives.
 // A play area with 8 cards on two crossing axes — a green colour-line and a
@@ -748,7 +806,7 @@ export default function App() {
             <div key={i} className={`rules-step${i % 2 === 1 ? ' rules-step--reverse' : ''}`}>
               <div className="rules-step__visual">
                 {i === 1 ? (
-                  <MiniHex card={SAMPLE_CARD} size={120} />
+                  <CardAnatomy t={t} />
                 ) : i === 3 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>

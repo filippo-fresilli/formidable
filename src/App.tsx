@@ -31,11 +31,19 @@ import { HistoryPanel } from './components/HistoryPanel'
 
 // ── Rules section constants ───────────────────────────────────────────────────
 const SAMPLE_CARD: Card = { os: 'Q', oc: 'R', is: 'C', ic: 'B' }
+// 4 cards sharing 1 trait (outer color = green) → +4 pt
 const SCORING_ROW: Card[] = [
   { os: 'T', oc: 'G', is: 'C', ic: 'R' },
   { os: 'Q', oc: 'G', is: 'T', ic: 'B' },
   { os: 'C', oc: 'G', is: 'Q', ic: 'R' },
   { os: 'T', oc: 'G', is: 'C', ic: 'B' },
+]
+// 4 cards sharing 2 traits (outer color = green + outer shape = triangle) → +8 pt
+const SCORING_ROW_2: Card[] = [
+  { os: 'T', oc: 'G', is: 'C', ic: 'R' },
+  { os: 'T', oc: 'G', is: 'Q', ic: 'B' },
+  { os: 'T', oc: 'G', is: 'C', ic: 'R' },
+  { os: 'T', oc: 'G', is: 'Q', ic: 'B' },
 ]
 
 // ── App ───────────────────────────────────────────────────────────────────────
@@ -591,11 +599,21 @@ export default function App() {
                 {i === 1 ? (
                   <MiniHex card={SAMPLE_CARD} size={120} />
                 ) : i === 3 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      {SCORING_ROW.map((c, j) => <MiniHex key={j} card={c} size={56} />)}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      {SCORING_ROW.map((c, j) => <MiniHex key={j} card={c} size={52} />)}
+                      <div style={{ marginLeft: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <span style={{ fontSize: 16, fontWeight: 800, color: '#3DC35A' }}>+4 pt</span>
+                        <span style={{ fontSize: 10, color: 'var(--text-faint)', lineHeight: 1.3 }}>{t.attrLabels.oc}</span>
+                      </div>
                     </div>
-                    <span style={{ fontSize: 22, fontWeight: 800, color: '#3DC35A' }}>+4 pt</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      {SCORING_ROW_2.map((c, j) => <MiniHex key={j} card={c} size={52} />)}
+                      <div style={{ marginLeft: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <span style={{ fontSize: 16, fontWeight: 800, color: '#3DC35A' }}>+8 pt</span>
+                        <span style={{ fontSize: 10, color: 'var(--text-faint)', lineHeight: 1.3 }}>{t.attrLabels.oc}<br />{t.attrLabels.os}</span>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <span className="rules-step__icon">{step.icon}</span>

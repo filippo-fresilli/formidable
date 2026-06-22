@@ -33,6 +33,7 @@ export interface I18nDict {
   shapeNamesShort: Record<'T' | 'Q' | 'C', string>
   colorNames: Record<'B' | 'R' | 'G', string>
   attrLabels: Record<'os' | 'oc' | 'is' | 'ic', string>
+  attrLabelsFull: Record<'os' | 'oc' | 'is' | 'ic', string>
   rulesTitle: string
   howToPlayTitle: string
   stepLabel: string
@@ -80,6 +81,7 @@ export const I18N: Record<Lang, I18nDict> = {
     shapeNamesShort: { T: 'Triang.', Q: 'Quadr.', C: 'Cerch.' },
     colorNames: { B: 'Blu', R: 'Rosso', G: 'Verde' },
     attrLabels: { os: 'forma est.', oc: 'colore est.', is: 'forma int.', ic: 'colore int.' },
+    attrLabelsFull: { os: 'forma esterna', oc: 'colore esterno', is: 'forma interna', ic: 'colore interno' },
     rulesTitle: 'Regole del gioco',
     howToPlayTitle: 'Come si gioca a Formidable?',
     stepLabel: 'Passo',
@@ -129,6 +131,7 @@ export const I18N: Record<Lang, I18nDict> = {
     shapeNamesShort: { T: 'Triang.', Q: 'Square', C: 'Circle' },
     colorNames: { B: 'Blue', R: 'Red', G: 'Green' },
     attrLabels: { os: 'outer shape', oc: 'outer color', is: 'inner shape', ic: 'inner color' },
+    attrLabelsFull: { os: 'outer shape', oc: 'outer color', is: 'inner shape', ic: 'inner color' },
     rulesTitle: 'Game rules',
     howToPlayTitle: 'How to play Formidable?',
     stepLabel: 'Step',
@@ -178,6 +181,7 @@ export const I18N: Record<Lang, I18nDict> = {
     shapeNamesShort: { T: 'Triang.', Q: 'Carré', C: 'Cercle' },
     colorNames: { B: 'Bleu', R: 'Rouge', G: 'Vert' },
     attrLabels: { os: 'forme ext.', oc: 'couleur ext.', is: 'forme int.', ic: 'couleur int.' },
+    attrLabelsFull: { os: 'forme extérieure', oc: 'couleur extérieure', is: 'forme intérieure', ic: 'couleur intérieure' },
     rulesTitle: 'Règles du jeu',
     howToPlayTitle: 'Comment jouer à Formidable ?',
     stepLabel: 'Étape',
